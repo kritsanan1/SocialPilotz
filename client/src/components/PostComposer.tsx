@@ -1,15 +1,11 @@
-
-import React, { useState } from 'react';
-import { 
-  Send, 
-  Image, 
-  Calendar, 
-  Hash, 
-  Clock, 
-  CheckCircle2, 
-  AlertCircle,
-  X
-} from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Button } from './ui/button';
+import { Textarea } from './ui/textarea';
+import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
+import { Badge } from './ui/badge';
+import { Input } from './ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
+import { Calendar, Image, Send, Clock, Hash, Sparkles, BarChart3, Target, CheckCircle2, AlertCircle, X } from 'lucide-react';
 
 interface SocialPlatform {
   id: string;
@@ -33,10 +29,72 @@ export default function PostComposer() {
   const [isPosting, setIsPosting] = useState(false);
   const [postStatus, setPostStatus] = useState<'idle' | 'success' | 'error'>('idle');
   const [statusMessage, setStatusMessage] = useState('');
+  const [showScheduler, setShowScheduler] = useState(false);
+  const [scheduleTime, setScheduleTime] = useState('');
+  const [mediaUrls, setMediaUrls] = useState<string[]>([]);
+  const [isGeneratingHashtags, setIsGeneratingHashtags] = useState(false);
+  const [suggestedHashtags, setSuggestedHashtags] = useState<string[]>([]);
+  const [contentType, setContentType] = useState('general');
+  const [aiSuggestions, setAiSuggestions] = useState<string[]>([]);
+
+  const platforms = [
+    { id: 'twitter', name: 'Twitter', color: 'bg-blue-500' },
+    { id: 'facebook', name: 'Facebook', color: 'bg-blue-600' },
+    { id: 'instagram', name: 'Instagram', color: 'bg-pink-500' },
+    { id: 'linkedin', name: 'LinkedIn', color: 'bg-blue-700' },
+    { id: 'tiktok', name: 'TikTok', color: 'bg-gray-900' },
+    { id: 'youtube', name: 'YouTube', color: 'bg-red-600' },
+    { id: 'threads', name: 'Threads', color: 'bg-gray-800' },
+    { id: 'bluesky', name: 'Bluesky', color: 'bg-sky-500' },
+  ];
+
+  const contentTypes = [
+    { value: 'general', label: 'General Content' },
+    { value: 'promotional', label: 'Promotional' },
+    { value: 'educational', label: 'Educational' },
+    { value: 'entertainment', label: 'Entertainment' },
+    { value: 'news', label: 'News & Updates' },
+    { value: 'personal', label: 'Personal Story' },
+  ];
+
+  const generateHashtags = async () => {
+    if (!content.trim()) return;
+
+    setIsGeneratingHashtags(true);
+    try {
+      const response = await fetch('/api/content/auto-hashtags', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ post: content }),
+      });
+
+      const result = await response.json();
+      if (result.success) {
+        setSuggestedHashtags(result.data.hashtags || []);
+      }
+    } catch (error) {
+      console.error('Error generating hashtags:', error);
+    } finally {
+      setIsGeneratingHashtags(false);
+    }
+  };
+
+  const addHashtag = (hashtag: string) => {
+    if (!content.includes(hashtag)) {
+      setContent(prev => prev + ' ' + hashtag);
+    }
+  };
+
+  useEffect(() => {
+    if (content.length > 50) {
+      const timer = setTimeout(generateHashtags, 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [content]);
 
   const handlePlatformToggle = (platformId: string) => {
-    setSelectedPlatforms(prev => 
-      prev.includes(platformId) 
+    setSelectedPlatforms(prev =>
+      prev.includes(platformId)
         ? prev.filter(id => id !== platformId)
         : [...prev, platformId]
     );
@@ -62,7 +120,7 @@ export default function PostComposer() {
       const payload = {
         post: content,
         platforms: selectedPlatforms,
-        ...(scheduleDate && { scheduleDate })
+        ...(scheduleDate && scheduleTime && { scheduleDateTime: `${scheduleDate}T${scheduleTime}:00` })
       };
 
       const response = await fetch('/api/social/post', {
@@ -80,6 +138,8 @@ export default function PostComposer() {
         setStatusMessage(scheduleDate ? 'Post scheduled successfully!' : 'Post published successfully!');
         setContent('');
         setScheduleDate('');
+        setScheduleTime('');
+        setShowScheduler(false);
       } else {
         setPostStatus('error');
         setStatusMessage(result.error || 'Failed to post content');
@@ -97,141 +157,182 @@ export default function PostComposer() {
     setStatusMessage('');
   };
 
+  const togglePlatform = (platformId: string) => {
+    setSelectedPlatforms(prevSelected =>
+      prevSelected.includes(platformId)
+        ? prevSelected.filter(id => id !== platformId)
+        : [...prevSelected, platformId]
+    );
+  };
+
   return (
-    <div className="bg-white rounded-xl shadow-soft border border-neutral-200 p-6 mb-6">
-      <div className="flex items-center justify-between mb-4">
-        <h3 className="text-lg font-semibold text-neutral-900">Create Post</h3>
-        <div className="flex space-x-2">
-          <button className="p-2 text-neutral-400 hover:text-neutral-600 hover:bg-neutral-100 rounded-lg transition-colors">
-            <Image className="w-4 h-4" />
-          </button>
-          <button className="p-2 text-neutral-400 hover:text-neutral-600 hover:bg-neutral-100 rounded-lg transition-colors">
-            <Hash className="w-4 h-4" />
-          </button>
-        </div>
-      </div>
-
-      {/* Status Messages */}
-      {postStatus !== 'idle' && (
-        <div className={`mb-4 p-3 rounded-lg flex items-center justify-between ${
-          postStatus === 'success' 
-            ? 'bg-green-50 border border-green-200' 
-            : 'bg-red-50 border border-red-200'
-        }`}>
-          <div className="flex items-center space-x-2">
-            {postStatus === 'success' ? (
-              <CheckCircle2 className="w-4 h-4 text-green-600" />
-            ) : (
-              <AlertCircle className="w-4 h-4 text-red-600" />
-            )}
-            <span className={`text-sm font-medium ${
-              postStatus === 'success' ? 'text-green-800' : 'text-red-800'
-            }`}>
-              {statusMessage}
-            </span>
+    <Card className="w-full max-w-xl mx-auto my-8 shadow-lg border-neutral-200">
+      <CardHeader>
+        <CardTitle className="text-xl font-semibold text-neutral-800">Create a New Post</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-4">
+          <div className="flex items-center gap-2 mb-4">
+            <Select value={contentType} onValueChange={setContentType}>
+              <SelectTrigger className="w-48">
+                <SelectValue placeholder="Content type" />
+              </SelectTrigger>
+              <SelectContent>
+                {contentTypes.map((type) => (
+                  <SelectItem key={type.value} value={type.value}>
+                    {type.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Button variant="outline" size="sm" onClick={generateHashtags} disabled={isGeneratingHashtags}>
+              <Sparkles className="w-4 h-4 mr-2" />
+              {isGeneratingHashtags ? 'Generating...' : 'AI Assist'}
+            </Button>
           </div>
-          <button 
-            onClick={clearStatus}
-            className={`p-1 rounded hover:bg-opacity-20 ${
-              postStatus === 'success' ? 'hover:bg-green-600' : 'hover:bg-red-600'
-            }`}
-          >
-            <X className="w-3 h-3" />
-          </button>
-        </div>
-      )}
 
-      {/* Post Content */}
-      <div className="mb-4">
-        <textarea
-          value={content}
-          onChange={(e) => setContent(e.target.value)}
-          placeholder="What's on your mind? Share your thoughts with your audience..."
-          className="w-full p-4 border border-neutral-200 rounded-lg resize-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-          rows={4}
-          maxLength={280}
-        />
-        <div className="flex justify-between items-center mt-2">
-          <span className="text-xs text-neutral-500">
-            {content.length}/280 characters
-          </span>
-        </div>
-      </div>
-
-      {/* Platform Selection */}
-      <div className="mb-4">
-        <label className="block text-sm font-medium text-neutral-700 mb-2">
-          Select Platforms
-        </label>
-        <div className="flex flex-wrap gap-2">
-          {socialPlatforms.map((platform) => (
-            <button
-              key={platform.id}
-              onClick={() => handlePlatformToggle(platform.id)}
-              disabled={!platform.enabled}
-              className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
-                selectedPlatforms.includes(platform.id)
-                  ? `${platform.color} text-white shadow-sm`
-                  : platform.enabled
-                  ? 'bg-neutral-100 text-neutral-700 hover:bg-neutral-200'
-                  : 'bg-neutral-50 text-neutral-400 cursor-not-allowed'
-              }`}
-            >
-              {platform.name}
-              {!platform.enabled && ' (Coming Soon)'}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Schedule Option */}
-      <div className="mb-4">
-        <div className="flex items-center space-x-3">
-          <Calendar className="w-4 h-4 text-neutral-500" />
-          <input
-            type="datetime-local"
-            value={scheduleDate}
-            onChange={(e) => setScheduleDate(e.target.value)}
-            className="px-3 py-2 border border-neutral-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            min={new Date().toISOString().slice(0, 16)}
+          <Textarea
+            placeholder="What's on your mind?"
+            value={content}
+            onChange={(e) => setContent(e.target.value)}
+            className="min-h-[120px] resize-none border-0 text-base placeholder:text-gray-400 focus-visible:ring-0"
           />
-          {scheduleDate && (
-            <button
-              onClick={() => setScheduleDate('')}
-              className="text-neutral-400 hover:text-neutral-600"
-            >
-              <X className="w-4 h-4" />
-            </button>
+
+          {suggestedHashtags.length > 0 && (
+            <div className="p-3 bg-blue-50 rounded-lg">
+              <p className="text-sm font-medium text-blue-700 mb-2">Suggested hashtags:</p>
+              <div className="flex flex-wrap gap-2">
+                {suggestedHashtags.map((hashtag, index) => (
+                  <Badge
+                    key={index}
+                    variant="secondary"
+                    className="cursor-pointer hover:bg-blue-100"
+                    onClick={() => addHashtag(hashtag)}
+                  >
+                    {hashtag}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+          )}
+
+          <div className="flex flex-wrap gap-2">
+            {platforms.map((platform) => (
+              <button
+                key={platform.id}
+                onClick={() => togglePlatform(platform.id)}
+                className={`px-3 py-1 rounded-full text-sm transition-all ${
+                  selectedPlatforms.includes(platform.id)
+                    ? `${platform.color} text-white`
+                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                }`}
+              >
+                {platform.name}
+              </button>
+            ))}
+          </div>
+
+          {/* Status Messages */}
+          {postStatus !== 'idle' && (
+            <div className={`p-3 rounded-lg flex items-center justify-between ${
+              postStatus === 'success'
+                ? 'bg-green-50 border border-green-200'
+                : 'bg-red-50 border border-red-200'
+            }`}>
+              <div className="flex items-center space-x-2">
+                {postStatus === 'success' ? (
+                  <CheckCircle2 className="w-4 h-4 text-green-600" />
+                ) : (
+                  <AlertCircle className="w-4 h-4 text-red-600" />
+                )}
+                <span className={`text-sm font-medium ${
+                  postStatus === 'success' ? 'text-green-800' : 'text-red-800'
+                }`}>
+                  {statusMessage}
+                </span>
+              </div>
+              <button
+                onClick={clearStatus}
+                className={`p-1 rounded hover:bg-opacity-20 ${
+                  postStatus === 'success' ? 'hover:bg-green-600' : 'hover:bg-red-600'
+                }`}
+              >
+                <X className="w-3 h-3" />
+              </button>
+            </div>
+          )}
+
+
+          <div className="flex justify-between items-center pt-4 border-t border-gray-100">
+            <div className="flex gap-2">
+              <Button variant="outline" size="sm">
+                <Image className="w-4 h-4 mr-2" />
+                Media
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowScheduler(!showScheduler)}
+              >
+                <Clock className="w-4 h-4 mr-2" />
+                Schedule
+              </Button>
+              <Button variant="outline" size="sm">
+                <BarChart3 className="w-4 h-4 mr-2" />
+                Analytics
+              </Button>
+            </div>
+
+            <div className="flex gap-2">
+              <Button variant="outline" size="sm">
+                <Target className="w-4 h-4" />
+              </Button>
+              <Button disabled={!content.trim() || selectedPlatforms.length === 0 || isPosting}>
+                {isPosting ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    <span className="ml-2">Posting...</span>
+                  </>
+                ) : (
+                  <>
+                    <Send className="w-4 h-4 mr-2" />
+                    Post Now
+                  </>
+                )}
+              </Button>
+            </div>
+          </div>
+
+          {showScheduler && (
+            <div className="p-4 bg-gray-50 rounded-lg border-t space-y-3">
+              <p className="text-sm font-medium text-gray-700">Schedule for later</p>
+              <div className="grid grid-cols-2 gap-2">
+                <Input
+                  type="date"
+                  value={scheduleDate}
+                  onChange={(e) => setScheduleDate(e.target.value)}
+                  className="text-sm"
+                />
+                <Input
+                  type="time"
+                  value={scheduleTime}
+                  onChange={(e) => setScheduleTime(e.target.value)}
+                  className="text-sm"
+                />
+              </div>
+              <div className="flex gap-2">
+                <Button size="sm" className="flex-1" onClick={handlePost} disabled={!content.trim() || selectedPlatforms.length === 0 || isPosting}>
+                  <Calendar className="w-4 h-4 mr-2" />
+                  Schedule Post
+                </Button>
+                <Button variant="outline" size="sm">
+                  Best Time
+                </Button>
+              </div>
+            </div>
           )}
         </div>
-        {scheduleDate && (
-          <p className="text-xs text-neutral-500 mt-1 ml-7">
-            <Clock className="w-3 h-3 inline mr-1" />
-            Post will be scheduled for {new Date(scheduleDate).toLocaleString()}
-          </p>
-        )}
-      </div>
-
-      {/* Post Button */}
-      <div className="flex justify-end">
-        <button
-          onClick={handlePost}
-          disabled={isPosting || !content.trim() || selectedPlatforms.length === 0}
-          className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-neutral-300 disabled:cursor-not-allowed transition-colors flex items-center space-x-2"
-        >
-          {isPosting ? (
-            <>
-              <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-              <span>Posting...</span>
-            </>
-          ) : (
-            <>
-              <Send className="w-4 h-4" />
-              <span>{scheduleDate ? 'Schedule Post' : 'Publish Now'}</span>
-            </>
-          )}
-        </button>
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 }
