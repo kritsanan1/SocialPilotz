@@ -7,6 +7,8 @@ import AnalyticsPreview from '../components/AnalyticsPreview';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
 import { Button } from '../components/ui/button';
 import { Badge } from '../components/ui/badge';
+import SEO from '../components/SEO';
+import { organizationSchema, softwareApplicationSchema, webSiteSchema } from '../utils/structuredData';
 
 // Assuming PostComposer component is defined elsewhere and imported
 // import PostComposer from '../components/PostComposer'; 
@@ -27,10 +29,20 @@ const Dashboard = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
-      <div className="max-w-7xl mx-auto p-6 space-y-8">
+    <>
+      <SEO 
+        title="SociaLink Dashboard - Social Media Management Platform"
+        description="Manage all your social media accounts from one dashboard. Schedule posts, track analytics, and engage with your audience across multiple platforms."
+        keywords="social media dashboard, social media management, post scheduling, social analytics"
+        structuredData={{
+          "@context": "https://schema.org",
+          "@graph": [organizationSchema, softwareApplicationSchema, webSiteSchema]
+        }}
+      />
+      <main className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100" role="main">
+        <div className="max-w-7xl mx-auto p-6 space-y-8">
         {/* Header Section */}
-        <div className="bg-white rounded-2xl p-8 shadow-sm border border-slate-200/60">
+        <header className="bg-white rounded-2xl p-8 shadow-sm border border-slate-200/60">
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-3xl font-bold text-slate-900 mb-2">
@@ -47,10 +59,12 @@ const Dashboard = () => {
               </Badge>
             </div>
           </div>
-        </div>
+        </header>
 
         {/* Quick Actions */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <section aria-labelledby="quick-actions-heading">
+          <h2 id="quick-actions-heading" className="sr-only">Quick Actions</h2>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {quickActions.map((action, index) => (
             <Card key={index} className="group hover:shadow-lg transition-all duration-300 cursor-pointer border-0 bg-white/80 backdrop-blur-sm">
               <CardContent className="p-6 text-center">
@@ -63,11 +77,19 @@ const Dashboard = () => {
           ))}
         </div>
 
+        </div>
+        </section>
+
         {/* Stats Overview */}
-        <StatsOverview />
+        <section aria-labelledby="stats-overview-heading">
+          <h2 id="stats-overview-heading" className="sr-only">Statistics Overview</h2>
+          <StatsOverview />
+        </section>
 
         {/* Insights Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <section aria-labelledby="insights-heading">
+          <h2 id="insights-heading" className="sr-only">Performance Insights</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {insights.map((insight, index) => (
             <Card key={index} className="bg-white/90 backdrop-blur-sm border-0 shadow-sm hover:shadow-md transition-all duration-300">
               <CardContent className="p-6">
@@ -84,6 +106,9 @@ const Dashboard = () => {
           ))}
         </div>
 
+        </div>
+        </section>
+
         {/* Main Content Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
           {/* Left Column - Post Composer & Activity */}
@@ -99,8 +124,9 @@ const Dashboard = () => {
             <ScheduledPostsList />
           </div>
         </div>
-      </div>
-    </div>
+        </div>
+      </main>
+    </>
   );
 };
 

@@ -139,7 +139,7 @@ const ActivityFeed = () => {
     if (!platform) return null;
 
     return (
-      <div className={`w-4 h-4 ${colors[platform]} rounded-full flex items-center justify-center text-white text-xs font-bold`}>
+      <div className={`w-4 h-4 ${colors[platform]} rounded-full flex items-center justify-center text-white text-xs font-bold`} aria-label={`${platform} logo`}>
         {platform[0].toUpperCase()}
       </div>
     );
@@ -161,7 +161,7 @@ const ActivityFeed = () => {
 
   if (loading) {
     return (
-      <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-lg">
+      <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-sm" role="region" aria-labelledby="activity-feed-title">
         <CardHeader>
           <div className="animate-pulse space-y-2">
             <div className="h-6 bg-slate-200 rounded w-1/3"></div>
@@ -184,20 +184,20 @@ const ActivityFeed = () => {
   }
 
   return (
-    <Card className="w-full bg-white shadow-sm border border-slate-200/60">
+    <Card className="w-full bg-white shadow-sm border border-slate-200/60" role="region" aria-labelledby="activity-feed-title">
       <CardHeader className="pb-3 sm:pb-4">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-3 sm:space-y-0">
           <div className="flex items-center space-x-3">
             <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gradient-to-br from-orange-500 to-red-500 flex items-center justify-center">
-              <Activity className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
+              <Activity className="w-4 h-4 sm:w-5 sm:h-5 text-white" aria-hidden="true" />
             </div>
             <div className="flex-1 min-w-0">
-              <CardTitle className="text-lg sm:text-xl font-semibold text-slate-900 truncate">Recent Activity</CardTitle>
+              <CardTitle id="activity-feed-title" className="text-lg sm:text-xl font-semibold text-slate-900 truncate">Recent Activity</CardTitle>
               <p className="text-xs sm:text-sm text-slate-600 mt-0.5 sm:mt-1">Latest updates and notifications</p>
             </div>
           </div>
           <Button variant="outline" size="sm" className="bg-slate-50 hover:bg-slate-100 transition-colors mobile-button self-start sm:self-auto">
-            <Filter className="w-4 h-4 mr-1 sm:mr-2" />
+            <Filter className="w-4 h-4 mr-1 sm:mr-2" aria-hidden="true" />
             Filter
           </Button>
         </div>
@@ -217,8 +217,8 @@ const ActivityFeed = () => {
 
                 <div className="flex items-start gap-4 pb-6">
                   {/* Icon */}
-                  <div className={`w-10 h-10 ${colorClasses} rounded-xl flex items-center justify-center shadow-sm`}>
-                    <Icon className="w-5 h-5" />
+                  <div className={`w-10 h-10 ${colorClasses} rounded-xl flex items-center justify-center shadow-sm`} aria-label={`${activity.title} icon`}>
+                    <Icon className="w-5 h-5" aria-hidden="true" />
                   </div>
 
                   {/* Content */}
@@ -238,19 +238,19 @@ const ActivityFeed = () => {
                       <div className="flex items-center gap-4 text-xs text-slate-500">
                         {activity.metrics.likes && (
                           <div className="flex items-center gap-1">
-                            <Heart className="w-3 h-3" />
+                            <Heart className="w-3 h-3" aria-hidden="true" />
                             {activity.metrics.likes}
                           </div>
                         )}
                         {activity.metrics.shares && (
                           <div className="flex items-center gap-1">
-                            <Share className="w-3 h-3" />
+                            <Share className="w-3 h-3" aria-hidden="true" />
                             {activity.metrics.shares}
                           </div>
                         )}
                         {activity.metrics.comments && (
                           <div className="flex items-center gap-1">
-                            <MessageSquare className="w-3 h-3" />
+                            <MessageSquare className="w-3 h-3" aria-hidden="true" />
                             {activity.metrics.comments}
                           </div>
                         )}
@@ -261,9 +261,7 @@ const ActivityFeed = () => {
                     {activity.user && (
                       <div className="flex items-center gap-2 mt-2">
                         <Avatar className="w-6 h-6">
-                          <div className="w-full h-full bg-slate-200 rounded-full flex items-center justify-center text-xs">
-                            {activity.user[0]}
-                          </div>
+                          <img src={`/api/avatar/${activity.user}`} alt={`${activity.user} avatar`} className="w-full h-full rounded-full" />
                         </Avatar>
                         <span className="text-xs text-slate-600">{activity.user}</span>
                       </div>
@@ -277,7 +275,7 @@ const ActivityFeed = () => {
 
         {activities.length === 0 && (
           <div className="text-center py-8">
-            <TrendingUp className="w-12 h-12 text-slate-300 mx-auto mb-3" />
+            <TrendingUp className="w-12 h-12 text-slate-300 mx-auto mb-3" aria-hidden="true" />
             <p className="text-slate-500">No recent activity</p>
           </div>
         )}

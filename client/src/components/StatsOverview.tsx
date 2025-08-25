@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { TrendingUp, Users, MessageSquare, Eye, BarChart3 } from 'lucide-react';
@@ -31,7 +30,7 @@ export default function StatsOverview() {
     try {
       const response = await fetch('/api/analytics/overview');
       const result = await response.json();
-      
+
       if (result.success) {
         // Process analytics data from Ayrshare
         const data = result.data;
@@ -93,7 +92,7 @@ export default function StatsOverview() {
 
   if (isLoading) {
     return (
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4" role="region" aria-label="Statistics overview">
         {[...Array(4)].map((_, i) => (
           <Card key={i}>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -111,18 +110,18 @@ export default function StatsOverview() {
   }
 
   return (
-    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4" role="region" aria-label="Statistics overview">
       {stats.map((stat) => (
         <Card key={stat.title}>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">{stat.title}</CardTitle>
-            <stat.icon className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium" aria-label={`Stat: ${stat.title}`}>{stat.title}</CardTitle>
+            <stat.icon className="h-4 w-4 text-muted-foreground" aria-label={stat.title} />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stat.value}</div>
+            <div className="text-2xl font-bold" aria-label={`Value: ${stat.value}`}>{stat.value}</div>
             <p className={`text-xs ${
               stat.changeType === 'positive' ? 'text-green-600' : 'text-red-600'
-            }`}>
+            }`} aria-label={`Change: ${stat.change} from last week`}>
               {stat.change} from last week
             </p>
           </CardContent>

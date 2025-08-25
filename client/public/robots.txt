@@ -1,0 +1,15 @@
+
+User-agent: *
+Allow: /
+
+# Sitemaps
+Sitemap: https://your-domain.com/sitemap.xml
+
+# Block private areas
+Disallow: /api/
+Disallow: /admin/
+Disallow: /_next/
+Disallow: /dist/
+
+# Crawl-delay for good bot behavior
+Crawl-delay: 1
