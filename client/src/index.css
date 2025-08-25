@@ -18,6 +18,62 @@
   .animate-scale-in {
     animation: scaleIn 0.2s ease-out;
   }
+
+  /* Mobile-optimized touch targets */
+  .touch-target {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  /* Mobile-friendly button sizing */
+  .mobile-button {
+    @apply touch-target px-4 py-3 text-base;
+  }
+
+  /* Responsive container spacing */
+  .mobile-container {
+    @apply px-4 sm:px-6 lg:px-8;
+  }
+
+  /* Mobile-optimized card padding */
+  .mobile-card {
+    @apply p-4 sm:p-6 lg:p-8;
+  }
+
+  /* Mobile typography scale */
+  .mobile-text-xs { font-size: 0.75rem; line-height: 1.1rem; }
+  .mobile-text-sm { font-size: 0.875rem; line-height: 1.25rem; }
+  .mobile-text-base { font-size: 1rem; line-height: 1.5rem; }
+  .mobile-text-lg { font-size: 1.125rem; line-height: 1.75rem; }
+  .mobile-text-xl { font-size: 1.25rem; line-height: 1.75rem; }
+  .mobile-text-2xl { font-size: 1.5rem; line-height: 2rem; }
+  .mobile-text-3xl { font-size: 1.875rem; line-height: 2.25rem; }
+
+  /* Mobile spacing utilities */
+  .mobile-space-y-2 > * + * { margin-top: 0.5rem; }
+  .mobile-space-y-4 > * + * { margin-top: 1rem; }
+  .mobile-space-y-6 > * + * { margin-top: 1.5rem; }
+
+  /* Mobile grid utilities */
+  .mobile-grid {
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: 1fr;
+  }
+  
+  @media (min-width: 640px) {
+    .mobile-grid {
+      gap: 1.5rem;
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+  
+  @media (min-width: 1024px) {
+    .mobile-grid {
+      gap: 2rem;
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
 }
 
 @keyframes slideInRight {

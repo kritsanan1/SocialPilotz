@@ -1,9 +1,9 @@
-
 import React from 'react';
-import { TrendingUp, Users, MessageSquare, Heart, Share, Eye } from 'lucide-react';
+import { TrendingUp, Users, MessageSquare, Heart, Share, Eye, TrendingDown, BarChart3 } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import { Badge } from './ui/badge';
 import { Progress } from './ui/progress';
+import { Button } from './ui/button';
 
 const AnalyticsPreview = () => {
   const metrics = [
@@ -15,6 +15,7 @@ const AnalyticsPreview = () => {
       icon: Eye,
       color: 'text-blue-600',
       bgColor: 'bg-blue-50',
+      label: 'Reach'
     },
     {
       title: 'Engagement',
@@ -24,6 +25,7 @@ const AnalyticsPreview = () => {
       icon: Heart,
       color: 'text-red-600',
       bgColor: 'bg-red-50',
+      label: 'Engagement'
     },
     {
       title: 'Comments',
@@ -33,6 +35,7 @@ const AnalyticsPreview = () => {
       icon: MessageSquare,
       color: 'text-green-600',
       bgColor: 'bg-green-50',
+      label: 'Comments'
     },
     {
       title: 'Shares',
@@ -42,6 +45,7 @@ const AnalyticsPreview = () => {
       icon: Share,
       color: 'text-purple-600',
       bgColor: 'bg-purple-50',
+      label: 'Shares'
     },
   ];
 
@@ -53,19 +57,26 @@ const AnalyticsPreview = () => {
   ];
 
   return (
-    <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-lg">
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-xl">
-          <TrendingUp className="w-6 h-6 text-blue-600" />
-          Analytics Overview
-        </CardTitle>
-        <CardDescription>
-          Your content performance over the last 30 days
-        </CardDescription>
+    <Card className="w-full bg-white/90 backdrop-blur-sm border-0 shadow-lg">
+      <CardHeader className="pb-3 sm:pb-4">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-3 sm:space-y-0">
+          <div className="flex items-center space-x-3">
+            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gradient-to-br from-green-500 to-blue-500 flex items-center justify-center">
+              <BarChart3 className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <CardTitle className="text-lg sm:text-xl font-semibold text-slate-900 truncate">Analytics Overview</CardTitle>
+              <p className="text-xs sm:text-sm text-slate-600 mt-0.5 sm:mt-1">Your content performance</p>
+            </div>
+          </div>
+          <Button variant="outline" size="sm" className="bg-slate-50 hover:bg-slate-100 transition-colors mobile-button self-start sm:self-auto">
+            View All
+          </Button>
+        </div>
       </CardHeader>
       <CardContent className="space-y-6">
         {/* Key Metrics */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {metrics.map((metric, index) => (
             <div key={index} className="relative p-4 rounded-xl bg-gradient-to-br from-white to-slate-50 border border-slate-100 hover:shadow-md transition-all duration-200">
               <div className="flex items-center justify-between mb-3">

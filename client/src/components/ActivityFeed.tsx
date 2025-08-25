@@ -1,6 +1,5 @@
-
 import React, { useState, useEffect } from 'react';
-import { MessageSquare, Heart, Share, TrendingUp, Calendar, User, CheckCircle, AlertCircle, Clock } from 'lucide-react';
+import { MessageSquare, Heart, Share, TrendingUp, Calendar, User, CheckCircle, AlertCircle, Clock, Activity, Filter, Send, MessageCircle } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import { Badge } from './ui/badge';
 import { Avatar } from './ui/avatar';
@@ -112,7 +111,7 @@ const ActivityFeed = () => {
   const getActivityColor = (type: string, status?: string) => {
     if (status === 'error') return 'text-red-600 bg-red-50';
     if (status === 'warning') return 'text-yellow-600 bg-yellow-50';
-    
+
     switch (type) {
       case 'post_published':
         return 'text-green-600 bg-green-50';
@@ -185,35 +184,43 @@ const ActivityFeed = () => {
   }
 
   return (
-    <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-lg">
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-xl">
-          <TrendingUp className="w-6 h-6 text-green-600" />
-          Recent Activity
-        </CardTitle>
-        <CardDescription>
-          Stay updated with your latest social media activities
-        </CardDescription>
+    <Card className="w-full bg-white shadow-sm border border-slate-200/60">
+      <CardHeader className="pb-3 sm:pb-4">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-3 sm:space-y-0">
+          <div className="flex items-center space-x-3">
+            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gradient-to-br from-orange-500 to-red-500 flex items-center justify-center">
+              <Activity className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <CardTitle className="text-lg sm:text-xl font-semibold text-slate-900 truncate">Recent Activity</CardTitle>
+              <p className="text-xs sm:text-sm text-slate-600 mt-0.5 sm:mt-1">Latest updates and notifications</p>
+            </div>
+          </div>
+          <Button variant="outline" size="sm" className="bg-slate-50 hover:bg-slate-100 transition-colors mobile-button self-start sm:self-auto">
+            <Filter className="w-4 h-4 mr-1 sm:mr-2" />
+            Filter
+          </Button>
+        </div>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="relative">
           {activities.map((activity, index) => {
             const Icon = getActivityIcon(activity.type);
             const colorClasses = getActivityColor(activity.type, activity.status);
-            
+
             return (
               <div key={activity.id} className="relative">
                 {/* Timeline line */}
                 {index < activities.length - 1 && (
                   <div className="absolute left-5 top-12 w-px h-16 bg-slate-200"></div>
                 )}
-                
+
                 <div className="flex items-start gap-4 pb-6">
                   {/* Icon */}
                   <div className={`w-10 h-10 ${colorClasses} rounded-xl flex items-center justify-center shadow-sm`}>
                     <Icon className="w-5 h-5" />
                   </div>
-                  
+
                   {/* Content */}
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between mb-1">
@@ -223,9 +230,9 @@ const ActivityFeed = () => {
                       </div>
                       <span className="text-xs text-slate-500">{formatTimeAgo(activity.timestamp)}</span>
                     </div>
-                    
+
                     <p className="text-sm text-slate-600 mb-2">{activity.description}</p>
-                    
+
                     {/* Metrics */}
                     {activity.metrics && (
                       <div className="flex items-center gap-4 text-xs text-slate-500">
@@ -249,7 +256,7 @@ const ActivityFeed = () => {
                         )}
                       </div>
                     )}
-                    
+
                     {/* User mention */}
                     {activity.user && (
                       <div className="flex items-center gap-2 mt-2">
@@ -267,14 +274,14 @@ const ActivityFeed = () => {
             );
           })}
         </div>
-        
+
         {activities.length === 0 && (
           <div className="text-center py-8">
             <TrendingUp className="w-12 h-12 text-slate-300 mx-auto mb-3" />
             <p className="text-slate-500">No recent activity</p>
           </div>
         )}
-        
+
         <div className="pt-4 border-t border-slate-200">
           <Button variant="outline" className="w-full">
             View All Activity

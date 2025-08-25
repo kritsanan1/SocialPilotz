@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Calendar, Clock, MoreVertical, Edit, Trash2, Send, Eye } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
@@ -81,10 +80,10 @@ const ScheduledPostsList = () => {
   };
 
   const formatTime = (dateString: string) => {
-    return new Date(dateString).toLocaleTimeString('en-US', { 
-      hour: 'numeric', 
+    return new Date(dateString).toLocaleTimeString('en-US', {
+      hour: 'numeric',
       minute: '2-digit',
-      hour12: true 
+      hour12: true
     });
   };
 
@@ -93,15 +92,22 @@ const ScheduledPostsList = () => {
   };
 
   return (
-    <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-lg h-fit">
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-xl">
-          <Calendar className="w-6 h-6 text-purple-600" />
-          Scheduled Posts
-        </CardTitle>
-        <CardDescription>
-          {posts.length} posts ready to publish
-        </CardDescription>
+    <Card className="w-full bg-white/90 backdrop-blur-sm border-0 shadow-lg h-fit">
+      <CardHeader className="pb-3 sm:pb-4">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-3 sm:space-y-0">
+          <div className="flex items-center space-x-3">
+            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
+              <Calendar className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <CardTitle className="text-lg sm:text-xl font-semibold text-slate-900 truncate">Scheduled Posts</CardTitle>
+              <p className="text-xs sm:text-sm text-slate-600 mt-0.5 sm:mt-1">Your upcoming content</p>
+            </div>
+          </div>
+          <Button variant="outline" size="sm" className="bg-slate-50 hover:bg-slate-100 transition-colors mobile-button self-start sm:self-auto">
+            View All
+          </Button>
+        </div>
       </CardHeader>
       <CardContent className="space-y-4">
         {posts.map((post) => (

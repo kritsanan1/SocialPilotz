@@ -1,6 +1,5 @@
-
 import React, { useState } from 'react';
-import { Send, Image, Calendar, Zap, X, Plus, Hash, Smile } from 'lucide-react';
+import { Send, Image, Calendar, Zap, X, Plus, Hash, Smile, Save, Edit3 } from 'lucide-react';
 import { Button } from './ui/button';
 import { Textarea } from './ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
@@ -51,47 +50,47 @@ const PostComposer = () => {
 
   return (
     <Card className="w-full max-w-2xl mx-auto shadow-lg border-0 bg-white/95 backdrop-blur-sm">
-      <CardHeader className="pb-4">
-        <CardTitle className="flex items-center gap-2 text-xl">
-          <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
-            <Zap className="w-4 h-4 text-white" />
+      <CardHeader className="pb-3 sm:pb-4">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-3 sm:space-y-0">
+          <div className="flex items-center space-x-3">
+            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
+              <Zap className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <CardTitle className="text-lg sm:text-xl font-semibold text-slate-900 truncate">Create New Post</CardTitle>
+              <p className="text-xs sm:text-sm text-slate-600 mt-0.5 sm:mt-1">Share your thoughts with the world</p>
+            </div>
           </div>
-          Create New Post
-        </CardTitle>
-        <CardDescription>
-          Compose and share across all your connected platforms
-        </CardDescription>
+          <Button variant="outline" size="sm" className="bg-slate-50 hover:bg-slate-100 transition-colors mobile-button self-start sm:self-auto">
+            <Save className="w-4 h-4 mr-2" />
+            Save Draft
+          </Button>
+        </div>
       </CardHeader>
 
-      <CardContent className="space-y-6">
+      <CardContent className="space-y-4 sm:space-y-6">
         {/* Platform Selection */}
         <div className="space-y-3">
           <Label className="text-sm font-medium text-slate-700">Select Platforms</Label>
-          <div className="flex flex-wrap gap-3">
+          <div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-2">
             {platforms.map((platform) => (
-              <div
+              <Button
                 key={platform.id}
-                className={`relative cursor-pointer transition-all duration-200 ${
-                  selectedPlatforms.includes(platform.id) ? 'scale-105' : 'hover:scale-105'
-                } ${!platform.enabled ? 'opacity-50 cursor-not-allowed' : ''}`}
-                onClick={() => platform.enabled && handlePlatformToggle(platform.id)}
+                type="button"
+                variant={selectedPlatforms.includes(platform.id) ? "default" : "outline"}
+                size="sm"
+                onClick={() => handlePlatformToggle(platform.id)}
+                className={`
+                  flex items-center justify-center sm:justify-start space-x-2 transition-all mobile-button min-h-[44px]
+                  ${selectedPlatforms.includes(platform.id)
+                    ? 'bg-blue-500 hover:bg-blue-600 text-white'
+                    : 'bg-white hover:bg-slate-50 text-slate-700 border-slate-200'
+                  }
+                `}
               >
-                <div className={`w-12 h-12 ${platform.color} rounded-xl flex items-center justify-center text-white font-bold shadow-lg ${
-                  selectedPlatforms.includes(platform.id) ? 'ring-4 ring-blue-200' : ''
-                }`}>
-                  {platform.icon}
-                </div>
-                {selectedPlatforms.includes(platform.id) && (
-                  <div className="absolute -top-2 -right-2 w-5 h-5 bg-green-500 rounded-full flex items-center justify-center">
-                    <Plus className="w-3 h-3 text-white rotate-45" />
-                  </div>
-                )}
-                {!platform.enabled && (
-                  <div className="absolute inset-0 bg-slate-400/50 rounded-xl flex items-center justify-center">
-                    <X className="w-4 h-4 text-slate-600" />
-                  </div>
-                )}
-              </div>
+                <span className="text-sm">{platform.icon}</span>
+                <span className="text-xs sm:text-sm font-medium">{platform.name}</span>
+              </Button>
             ))}
           </div>
           <div className="flex flex-wrap gap-2 mt-2">
@@ -120,7 +119,7 @@ const PostComposer = () => {
             placeholder="What's happening? Share your thoughts..."
             value={content}
             onChange={(e) => setContent(e.target.value)}
-            className="min-h-[120px] resize-none border-slate-200 focus:border-blue-400 focus:ring-blue-400/20 text-base"
+            className="min-h-[100px] sm:min-h-[120px] resize-none border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200/50 transition-all text-slate-900 placeholder:text-slate-400 text-sm sm:text-base"
           />
         </div>
 
@@ -158,27 +157,31 @@ const PostComposer = () => {
         </div>
 
         {/* Action Buttons */}
-        <div className="flex items-center gap-3 pt-2">
-          <Button
-            onClick={handlePost}
-            disabled={!content.trim() || selectedPlatforms.length === 0 || isPosting}
-            className="flex-1 h-12 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-medium shadow-lg transition-all duration-200"
-          >
-            {isPosting ? (
-              <div className="flex items-center gap-2">
-                <div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin" />
-                Publishing...
-              </div>
-            ) : (
-              <div className="flex items-center gap-2">
-                <Send className="w-4 h-4" />
-                {isScheduled ? 'Schedule Post' : 'Post Now'}
-              </div>
-            )}
-          </Button>
-          <Button variant="outline" className="h-12 px-6">
-            Save Draft
-          </Button>
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-3 sm:space-y-0 pt-4 border-t border-slate-100">
+          <div className="flex items-center space-x-2 sm:space-x-4 order-2 sm:order-1">
+            <Button variant="outline" size="sm" className="bg-slate-50 hover:bg-slate-100 transition-colors mobile-button flex-1 sm:flex-none">
+              <Image className="w-4 h-4 mr-1 sm:mr-2" />
+              <span className="text-xs sm:text-sm">Media</span>
+            </Button>
+            <Button variant="outline" size="sm" className="bg-slate-50 hover:bg-slate-100 transition-colors mobile-button flex-1 sm:flex-none">
+              <Calendar className="w-4 h-4 mr-1 sm:mr-2" />
+              <span className="text-xs sm:text-sm">Schedule</span>
+            </Button>
+          </div>
+
+          <div className="flex items-center space-x-2 sm:space-x-3 order-1 sm:order-2">
+            <Button variant="outline" className="bg-slate-50 hover:bg-slate-100 transition-colors mobile-button flex-1 sm:flex-none">
+              Preview
+            </Button>
+            <Button 
+              onClick={handlePost}
+              disabled={!content.trim() || selectedPlatforms.length === 0 || isPosting}
+              className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white shadow-md hover:shadow-lg transition-all mobile-button flex-1 sm:flex-none"
+            >
+              <Send className="w-4 h-4 mr-1 sm:mr-2" />
+              <span className="text-sm sm:text-base">{isScheduled ? 'Schedule Post' : 'Post Now'}</span>
+            </Button>
+          </div>
         </div>
       </CardContent>
     </Card>

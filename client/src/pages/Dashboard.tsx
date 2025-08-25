@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Calendar, TrendingUp, Users, BarChart3, Clock, MessageSquare, Target, Zap } from 'lucide-react';
 import StatsOverview from '../components/StatsOverview';
@@ -8,6 +7,9 @@ import AnalyticsPreview from '../components/AnalyticsPreview';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
 import { Button } from '../components/ui/button';
 import { Badge } from '../components/ui/badge';
+
+// Assuming PostComposer component is defined elsewhere and imported
+// import PostComposer from '../components/PostComposer'; 
 
 const Dashboard = () => {
   const quickActions = [
@@ -83,15 +85,17 @@ const Dashboard = () => {
         </div>
 
         {/* Main Content Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Left Column - Analytics */}
-          <div className="lg:col-span-2 space-y-6">
-            <AnalyticsPreview />
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
+          {/* Left Column - Post Composer & Activity */}
+          <div className="lg:col-span-2 space-y-4 sm:space-y-6 lg:space-y-8">
+            {/* Placeholder for PostComposer as it was not in the original code */}
+            {/* <PostComposer /> */}
             <ActivityFeed />
           </div>
 
-          {/* Right Column - Scheduled Posts */}
-          <div className="space-y-6">
+          {/* Right Column - Analytics & Scheduled Posts */}
+          <div className="space-y-4 sm:space-y-6 lg:space-y-8">
+            <AnalyticsPreview />
             <ScheduledPostsList />
           </div>
         </div>
