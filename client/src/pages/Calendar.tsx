@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
@@ -32,7 +31,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { Checkbox } from '../components/ui/checkbox';
 
 const Calendar = () => {
-  const [selectedDate, setSelectedDate] = useState(new Date());
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
   const [viewMode, setViewMode] = useState('month');
   const [filterPlatform, setFilterPlatform] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
@@ -40,10 +39,13 @@ const Calendar = () => {
 
   const queryClient = useQueryClient();
 
-  const { data: scheduledPosts, isLoading } = useQuery({
+  const { data: scheduledPosts, isLoading: isScheduledPostsLoading } = useQuery({
     queryKey: ['posts', 'scheduled'],
     queryFn: async () => {
       const response = await fetch('/api/posts/scheduled');
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
       return response.json();
     }
   });
@@ -55,6 +57,9 @@ const Calendar = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ scheduleDate })
       });
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
       return response.json();
     },
     onSuccess: () => {
@@ -69,6 +74,9 @@ const Calendar = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(postData)
       });
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
       return response.json();
     },
     onSuccess: () => {
@@ -91,7 +99,7 @@ const Calendar = () => {
 
   const getPostsForDate = (date: Date) => {
     if (!scheduledPosts?.data?.posts) return [];
-    
+
     return scheduledPosts.data.posts.filter((post: any) => {
       const postDate = new Date(post.scheduleDate);
       return postDate.toDateString() === date.toDateString();
@@ -114,7 +122,7 @@ const Calendar = () => {
   };
 
   const getDayView = () => {
-    const dayPosts = getPostsForDate(selectedDate);
+    const dayPosts = getPostsForDate(selectedDate!);
     const timeSlots = generateTimeSlots();
 
     return (
@@ -148,9 +156,9 @@ const Calendar = () => {
   };
 
   const getWeekView = () => {
-    const startOfWeek = new Date(selectedDate);
-    startOfWeek.setDate(selectedDate.getDate() - selectedDate.getDay());
-    
+    const startOfWeek = new Date(selectedDate!);
+    startOfWeek.setDate(selectedDate!.getDate() - selectedDate!.getDay());
+
     const days = [];
     for (let i = 0; i < 7; i++) {
       const day = new Date(startOfWeek);
@@ -176,7 +184,7 @@ const Calendar = () => {
     );
   };
 
-  if (isLoading) {
+  if (isScheduledPostsLoading) {
     return (
       <div className="container mx-auto p-6">
         <div className="animate-pulse space-y-6">
@@ -229,7 +237,7 @@ const Calendar = () => {
             <DialogContent className="max-w-2xl">
               <CreatePostForm 
                 onSubmit={(data) => createPostMutation.mutate(data)}
-                selectedDate={selectedDate}
+                selectedDate={selectedDate || new Date()} 
               />
             </DialogContent>
           </Dialog>
@@ -268,40 +276,40 @@ const Calendar = () => {
             variant="outline" 
             size="icon"
             onClick={() => {
-              const newDate = new Date(selectedDate);
+              const newDate = new Date(selectedDate || new Date());
               if (viewMode === 'day') {
-                newDate.setDate(selectedDate.getDate() - 1);
+                newDate.setDate(selectedDate!.getDate() - 1);
               } else if (viewMode === 'week') {
-                newDate.setDate(selectedDate.getDate() - 7);
+                newDate.setDate(selectedDate!.getDate() - 7);
               } else {
-                newDate.setMonth(selectedDate.getMonth() - 1);
+                newDate.setMonth(selectedDate!.getMonth() - 1);
               }
               setSelectedDate(newDate);
             }}
           >
             <ChevronLeft className="h-4 w-4" />
           </Button>
-          
+
           <h2 className="text-xl font-semibold">
             {viewMode === 'day' 
-              ? selectedDate.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })
+              ? selectedDate?.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })
               : viewMode === 'week'
-              ? `Week of ${selectedDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`
-              : selectedDate.toLocaleDateString('en-US', { year: 'numeric', month: 'long' })
+              ? `Week of ${selectedDate?.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`
+              : selectedDate?.toLocaleDateString('en-US', { year: 'numeric', month: 'long' })
             }
           </h2>
-          
+
           <Button 
             variant="outline" 
             size="icon"
             onClick={() => {
-              const newDate = new Date(selectedDate);
+              const newDate = new Date(selectedDate || new Date());
               if (viewMode === 'day') {
-                newDate.setDate(selectedDate.getDate() + 1);
+                newDate.setDate(selectedDate!.getDate() + 1);
               } else if (viewMode === 'week') {
-                newDate.setDate(selectedDate.getDate() + 7);
+                newDate.setDate(selectedDate!.getDate() + 7);
               } else {
-                newDate.setMonth(selectedDate.getMonth() + 1);
+                newDate.setMonth(selectedDate!.getMonth() + 1);
               }
               setSelectedDate(newDate);
             }}
@@ -309,7 +317,7 @@ const Calendar = () => {
             <ChevronRight className="h-4 w-4" />
           </Button>
         </div>
-        
+
         <Button variant="outline" onClick={() => setSelectedDate(new Date())}>
           Today
         </Button>
@@ -326,10 +334,12 @@ const Calendar = () => {
             <CalendarComponent
               mode="single"
               selected={selectedDate}
-              onSelect={(date) => date && setSelectedDate(date)}
+              onSelect={(date) => {
+                date && setSelectedDate(date);
+              }}
               className="rounded-md border"
             />
-            
+
             {/* Quick Stats */}
             <div className="mt-4 space-y-2">
               <div className="text-sm">
@@ -445,7 +455,7 @@ const CreatePostForm = ({ onSubmit, selectedDate }: {
           Create and schedule a post across your social media platforms
         </DialogDescription>
       </DialogHeader>
-      
+
       <div className="space-y-4">
         <div>
           <label className="text-sm font-medium">Content</label>

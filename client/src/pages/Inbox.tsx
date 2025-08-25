@@ -1,5 +1,4 @@
-
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   MessageCircle,
@@ -42,6 +41,9 @@ const Inbox = () => {
     queryKey: ['inbox'],
     queryFn: async () => {
       const response = await fetch('/api/inbox');
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
       return response.json();
     }
   });
@@ -53,6 +55,9 @@ const Inbox = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ content })
       });
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
       return response.json();
     },
     onSuccess: () => {
@@ -108,11 +113,11 @@ const Inbox = () => {
       (filter === 'unread' && !item.isRead) ||
       (filter === 'high-priority' && item.priority === 'high') ||
       (filter === item.type);
-    
+
     const matchesSearch = searchQuery === '' || 
       item.content.toLowerCase().includes(searchQuery.toLowerCase()) ||
       item.author.toLowerCase().includes(searchQuery.toLowerCase());
-    
+
     return matchesFilter && matchesSearch;
   }) || [];
 
@@ -165,7 +170,7 @@ const Inbox = () => {
             </div>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
@@ -177,7 +182,7 @@ const Inbox = () => {
             </div>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
@@ -191,7 +196,7 @@ const Inbox = () => {
             </div>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
@@ -215,7 +220,7 @@ const Inbox = () => {
             className="w-full"
           />
         </div>
-        
+
         <Select value={filter} onValueChange={setFilter}>
           <SelectTrigger className="w-48">
             <SelectValue />
@@ -241,7 +246,7 @@ const Inbox = () => {
             onClick={() => setSelectedItem(item)}
           />
         ))}
-        
+
         {filteredItems.length === 0 && (
           <Card>
             <CardContent className="p-8 text-center">
@@ -321,14 +326,14 @@ const InboxItem = ({ item, onReply, onClick }: {
   };
 
   return (
-    <Card className={`border-l-4 ${getPriorityColor(item.priority)} ${!item.isRead ? 'bg-blue-50/50' : ''}`}>
+    <Card className={`border-l-4 ${getPriorityColor(item.priority)} ${!item.isRead ? 'bg-blue-50' : ''}`}>
       <CardContent className="p-4">
         <div className="flex items-start gap-4">
           <Avatar className="h-10 w-10">
             <AvatarImage src={item.authorAvatar} />
             <AvatarFallback>{item.author.slice(0, 2).toUpperCase()}</AvatarFallback>
           </Avatar>
-          
+
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 mb-2">
               <h4 className="font-medium">{item.author}</h4>
@@ -349,15 +354,15 @@ const InboxItem = ({ item, onReply, onClick }: {
                 <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
               )}
             </div>
-            
+
             <p className="text-sm text-gray-700 mb-2">{item.content}</p>
-            
+
             {item.postTitle && (
               <p className="text-xs text-muted-foreground bg-gray-100 p-2 rounded">
                 Re: {item.postTitle}
               </p>
             )}
-            
+
             <div className="flex items-center gap-2 mt-3">
               <Button 
                 variant="outline" 
@@ -375,7 +380,7 @@ const InboxItem = ({ item, onReply, onClick }: {
                 <MoreHorizontal className="h-3 w-3" />
               </Button>
             </div>
-            
+
             {isReplyOpen && (
               <div className="mt-3 space-y-2">
                 <Textarea
