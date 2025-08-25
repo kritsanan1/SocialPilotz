@@ -189,7 +189,7 @@ export default function ActivityFeed() {
     );
   }
 
-  const activities = activityData?.activities || []; // Assign fetched data to activities
+  // const activities = activityData?.activities || []; // Assign fetched data to activities - This was the duplicate declaration
 
   const getActivityIcon = (type: string) => {
     switch (type) {
@@ -266,7 +266,7 @@ export default function ActivityFeed() {
         </div>
 
         <div className="space-y-4">
-          {activities.map((activity: any) => (
+          {filteredActivities.map((activity: any) => (
               <div key={activity.id} className="flex items-start space-x-3 p-3 rounded-lg border bg-card hover:bg-muted/50 transition-colors">
                 <div className="flex-shrink-0 mt-0.5">
                   {getActivityIcon(activity.type)}
@@ -285,7 +285,7 @@ export default function ActivityFeed() {
                       {new Date(activity.timestamp).toLocaleString()}
                     </span>
                     <div className="flex gap-1">
-                      {activity.platforms.map((platform: string) => (
+                      {activity.platforms?.map((platform: string) => (
                         <Badge key={platform} variant="secondary" className="text-xs">
                           {platform}
                         </Badge>
