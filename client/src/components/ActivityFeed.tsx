@@ -45,15 +45,16 @@ export default function ActivityFeed() {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold text-neutral-900">Recent Activity</h2>
+      <div className="flex items-center justify-between mb-1">
+        <h2 className="text-lg font-semibold text-neutral-900">Recent Posts</h2>
         <button 
-          className="text-sm text-warm-blue font-medium hover:text-blue-600 transition-colors"
+          className="text-sm text-emerald-600 font-medium hover:text-emerald-700 transition-colors"
           data-testid="button-view-all-activity"
         >
           View All
         </button>
       </div>
+      <p className="text-sm text-neutral-500 mb-4">Your latest published content performance</p>
 
       {recentPosts.map((post) => (
         <div 

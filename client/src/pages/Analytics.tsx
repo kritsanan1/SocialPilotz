@@ -3,10 +3,10 @@ import Layout from '@/components/Layout';
 
 export default function Analytics() {
   const metrics = [
-    { label: 'Total Reach', value: '127K', change: '+12.5%', icon: Eye, color: 'text-warm-blue' },
-    { label: 'Engagement Rate', value: '8.7%', change: '+2.3%', icon: Heart, color: 'text-muted-rose' },
-    { label: 'Total Followers', value: '45.2K', change: '+5.1%', icon: Users, color: 'text-sage' },
-    { label: 'Post Interactions', value: '3.8K', change: '+18.7%', icon: MessageCircle, color: 'text-dusty-purple' },
+    { label: 'Total Reach', value: '127K', change: '+12.5%', icon: Eye, color: 'text-blue-500' },
+    { label: 'Engagement Rate', value: '8.7%', change: '+2.3%', icon: Heart, color: 'text-red-500' },
+    { label: 'Total Followers', value: '45.2K', change: '+5.1%', icon: Users, color: 'text-emerald-500' },
+    { label: 'Post Interactions', value: '3.8K', change: '+18.7%', icon: MessageCircle, color: 'text-purple-500' },
   ];
 
   const topPerformingPosts = [
@@ -15,7 +15,7 @@ export default function Analytics() {
       content: 'AI-powered content scheduling launch announcement',
       engagement: '15.3%',
       reach: '12.4K',
-      color: 'bg-warm-blue'
+      color: 'bg-blue-500'
     },
     {
       platform: 'Twitter',
@@ -71,7 +71,7 @@ export default function Analytics() {
         {/* Performance Chart Placeholder */}
         <div className="bg-white rounded-xl shadow-soft border border-neutral-200 p-4 mb-6">
           <h3 className="text-lg font-semibold text-neutral-900 mb-4">Engagement Over Time</h3>
-          <div className="h-48 bg-gradient-to-r from-warm-blue/10 to-sage/10 rounded-lg flex items-center justify-center border border-neutral-200">
+          <div className="h-48 bg-gradient-to-r from-emerald-50 to-teal-50 rounded-lg flex items-center justify-center border border-neutral-200">
             <div className="text-center">
               <TrendingUp className="w-12 h-12 text-neutral-400 mx-auto mb-2" />
               <p className="text-neutral-500">Interactive chart will be displayed here</p>
@@ -116,12 +116,12 @@ export default function Analytics() {
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-3">
-                <div className="w-3 h-3 bg-warm-blue rounded-full" />
+                <div className="w-3 h-3 bg-blue-500 rounded-full" />
                 <span className="text-sm font-medium text-neutral-900">LinkedIn</span>
               </div>
               <div className="flex-1 mx-4">
                 <div className="w-full bg-neutral-200 rounded-full h-2">
-                  <div className="bg-warm-blue h-2 rounded-full" style={{ width: '85%' }} />
+                  <div className="bg-blue-500 h-2 rounded-full" style={{ width: '85%' }} />
                 </div>
               </div>
               <span className="text-sm text-neutral-600">85%</span>

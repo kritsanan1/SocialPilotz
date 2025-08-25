@@ -34,9 +34,9 @@ export default function CalendarPreview() {
   ];
 
   const getStatusColor = (time: string) => {
-    if (time.includes('Today')) return 'bg-warm-blue';
-    if (time.includes('Tomorrow')) return 'bg-sage';
-    return 'bg-dusty-purple';
+    if (time.includes('Today')) return 'bg-blue-500';
+    if (time.includes('Tomorrow')) return 'bg-emerald-500';
+    return 'bg-purple-500';
   };
 
   return (
@@ -44,7 +44,7 @@ export default function CalendarPreview() {
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-lg font-semibold text-neutral-900">Upcoming Posts</h2>
         <button 
-          className="text-sm text-warm-blue font-medium hover:text-blue-600 transition-colors"
+          className="text-sm text-emerald-600 font-medium hover:text-emerald-700 transition-colors"
           data-testid="button-calendar-view"
         >
           Calendar View

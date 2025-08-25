@@ -20,7 +20,7 @@ export default function AnalyticsPreview() {
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-lg font-semibold text-neutral-900">Analytics Insights</h2>
         <button 
-          className="text-sm text-warm-blue font-medium hover:text-blue-600 transition-colors"
+          className="text-sm text-emerald-600 font-medium hover:text-emerald-700 transition-colors"
           data-testid="button-full-report"
         >
           Full Report
@@ -55,7 +55,7 @@ export default function AnalyticsPreview() {
             <span className="text-sm font-medium text-neutral-700">Best Time to Post</span>
             <Clock className="w-4 h-4 text-neutral-500" />
           </div>
-          <div className="text-warm-blue font-semibold" data-testid="text-best-time">
+          <div className="text-emerald-600 font-semibold" data-testid="text-best-time">
             {analytics.bestTimeToPost}
           </div>
           <div className="text-xs text-neutral-500" data-testid="text-best-days">

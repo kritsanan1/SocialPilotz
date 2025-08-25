@@ -8,7 +8,8 @@ import {
   User, 
   Bell, 
   Zap,
-  Plus
+  Plus,
+  Settings
 } from 'lucide-react';
 
 interface LayoutProps {
@@ -33,28 +34,39 @@ export default function Layout({ children }: LayoutProps) {
     <div className="min-h-screen bg-gradient-to-br from-neutral-50 to-neutral-100">
       {/* Top Navigation */}
       <header className="bg-white shadow-soft border-b border-neutral-200 sticky top-0 z-50">
-        <div className="px-4 py-3">
+        <div className="px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
-              <div className="w-8 h-8 bg-gradient-to-r from-warm-blue to-sage rounded-lg flex items-center justify-center">
-                <Zap className="w-5 h-5 text-white" />
+              <div className="w-10 h-10 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-xl flex items-center justify-center">
+                <span className="text-white font-bold text-lg">S</span>
               </div>
-              <h1 className="text-lg font-semibold text-neutral-900">SociaLink</h1>
+              <div>
+                <h1 className="text-xl font-bold text-neutral-900">SociaLink</h1>
+                <p className="text-xs text-neutral-500">Content Management</p>
+              </div>
             </div>
-            <div className="flex items-center space-x-3">
+            <div className="flex items-center space-x-2">
               <button 
-                className="relative p-2 text-neutral-600 hover:bg-neutral-100 rounded-lg transition-colors"
+                className="relative p-2 text-neutral-600 hover:bg-neutral-100 rounded-xl transition-colors"
                 data-testid="button-notifications"
               >
                 <Bell className="w-5 h-5" />
                 {notifications > 0 && (
-                  <span className="absolute -top-1 -right-1 w-3 h-3 bg-muted-rose rounded-full" />
+                  <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
+                    {notifications}
+                  </span>
                 )}
               </button>
+              <button 
+                className="p-2 text-neutral-600 hover:bg-neutral-100 rounded-xl transition-colors"
+                data-testid="button-settings"
+              >
+                <Settings className="w-5 h-5" />
+              </button>
               <img 
-                src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&h=100" 
+                src="https://images.unsplash.com/photo-1494790108755-2616b612b786?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&h=100" 
                 alt="Profile" 
-                className="w-8 h-8 rounded-lg object-cover"
+                className="w-9 h-9 rounded-xl object-cover border-2 border-neutral-200"
                 data-testid="img-profile"
               />
             </div>
@@ -100,7 +112,7 @@ export default function Layout({ children }: LayoutProps) {
 
       {/* Floating Action Button */}
       <button 
-        className="fixed bottom-20 right-4 w-14 h-14 bg-gradient-to-r from-warm-blue to-sage text-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center z-30"
+        className="fixed bottom-24 right-4 w-14 h-14 bg-gradient-to-r from-emerald-500 to-teal-500 text-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center z-30 hover:scale-105"
         data-testid="button-quick-post"
       >
         <Plus className="w-6 h-6" />

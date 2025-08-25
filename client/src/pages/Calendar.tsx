@@ -54,7 +54,7 @@ export default function Calendar() {
             <p className="text-neutral-600">Plan and schedule your social media posts</p>
           </div>
           <Button 
-            className="bg-warm-blue hover:bg-blue-600 text-white"
+            className="bg-emerald-500 hover:bg-emerald-600 text-white"
             data-testid="button-new-post"
           >
             <Plus className="w-4 h-4 mr-2" />
