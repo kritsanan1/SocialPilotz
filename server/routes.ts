@@ -52,13 +52,55 @@ export function registerRoutes(app: Express) {
     }
   });
 
+  // Post history endpoint
+  app.get("/api/social/history", async (req, res) => {
+    try {
+      if (!AYRSHARE_API_KEY) {
+        return res.status(500).json({ 
+          success: false, 
+          error: "Ayrshare API key not configured" 
+        });
+      }
+
+      const historyResponse = await ayrshareHistory();
+      
+      if (historyResponse.status === "success") {
+        res.json({ success: true, data: historyResponse.data });
+      } else {
+        res.status(400).json({ 
+          success: false, 
+          error: historyResponse.error 
+        });
+      }
+    } catch (error) {
+      console.error("Post history error:", error);
+      res.status(500).json({ success: false, error: "Failed to fetch post history" });
+    }
+  });
+
   // Social media posts endpoints
   app.post("/api/posts", async (req, res) => {
     try {
+      // Validate API key
+      if (!AYRSHARE_API_KEY) {
+        return res.status(500).json({ 
+          success: false, 
+          error: "Ayrshare API key not configured" 
+        });
+      }
+
       const { content, platforms, scheduleDate, mediaUrls } = req.body;
       
-      // Mock Ayrshare API call
-      const ayrshareResponse = await mockAyrsharePost({
+      // Validate required fields
+      if (!content || !platforms || platforms.length === 0) {
+        return res.status(400).json({
+          success: false,
+          error: "Content and at least one platform are required"
+        });
+      }
+      
+      // Real Ayrshare API call
+      const ayrshareResponse = await ayrsharePost({
         post: content,
         platforms,
         scheduleDate,
@@ -97,6 +139,50 @@ export function registerRoutes(app: Express) {
     }
   });
 
+  // Get scheduled posts
+  app.get("/api/posts/scheduled", async (req, res) => {
+    try {
+      // Enhanced mock scheduled posts data
+      const posts = [
+        {
+          id: "sched_1",
+          post: "Exciting product launch announcement! 🚀 Our new AI-powered social media tool is coming next week.",
+          platforms: ["twitter", "linkedin", "facebook"],
+          scheduleDate: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(), // Tomorrow
+          status: "scheduled",
+          mediaUrls: [],
+          createdAt: new Date().toISOString(),
+        },
+        {
+          id: "sched_2", 
+          post: "Behind the scenes: How we built our content calendar with drag-and-drop functionality. The key was using React DnD with a clean, intuitive interface.",
+          platforms: ["linkedin", "twitter"],
+          scheduleDate: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString(), // Day after tomorrow
+          status: "scheduled",
+          mediaUrls: [],
+          createdAt: new Date().toISOString(),
+        },
+        {
+          id: "sched_3",
+          post: "Weekly tips: 5 ways to improve your social media engagement rate and build a stronger community around your brand.",
+          platforms: ["instagram", "facebook", "linkedin"],
+          scheduleDate: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString(), // 3 days
+          status: "scheduled",
+          mediaUrls: ["https://via.placeholder.com/800x600"],
+          createdAt: new Date().toISOString(),
+        }
+      ];
+
+      res.json({ 
+        success: true,
+        data: { posts }
+      });
+    } catch (error) {
+      console.error("Scheduled posts error:", error);
+      res.status(500).json({ success: false, error: "Failed to fetch scheduled posts" });
+    }
+  });
+
   app.get("/api/posts", async (req, res) => {
     try {
       // Mock scheduled posts data
@@ -130,8 +216,8 @@ export function registerRoutes(app: Express) {
     try {
       const { id } = req.params;
       
-      // Mock Ayrshare delete API call
-      const deleteResponse = await mockAyrshareDelete(id);
+      // Real Ayrshare delete API call
+      const deleteResponse = await ayrshareDelete(id);
       
       if (deleteResponse.status === "success") {
         res.json({ success: true, message: "Post deleted successfully" });
@@ -250,6 +336,79 @@ export function registerRoutes(app: Express) {
   });
 
   // Inbox/Engagement endpoints
+  app.get("/api/inbox", async (req, res) => {
+    try {
+      // Enhanced mock engagement data with better structure
+      const items = [
+        {
+          id: "1",
+          type: "comment",
+          platform: "Instagram",
+          author: "john_doe",
+          authorAvatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=john",
+          content: "Love this content! Very helpful insights about social media strategy.",
+          postTitle: "5 Tips for Better Social Media Engagement",
+          timestamp: new Date(Date.now() - 30 * 60 * 1000).toISOString(), // 30 min ago
+          isRead: false,
+          sentiment: "positive",
+          priority: "medium"
+        },
+        {
+          id: "2",
+          type: "mention",
+          platform: "Twitter", 
+          author: "sarah_marketing",
+          authorAvatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=sarah",
+          content: "Great insights from @yourcompany on social media trends! Thanks for sharing.",
+          timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(), // 2 hours ago
+          isRead: false,
+          sentiment: "positive",
+          priority: "high"
+        },
+        {
+          id: "3",
+          type: "direct_message",
+          platform: "LinkedIn",
+          author: "Mike Johnson",
+          authorAvatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=mike", 
+          content: "Hi! I'm interested in learning more about your social media management services. Could we schedule a call?",
+          timestamp: new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString(), // 4 hours ago
+          isRead: true,
+          sentiment: "neutral",
+          priority: "high"
+        },
+        {
+          id: "4",
+          type: "comment",
+          platform: "LinkedIn",
+          author: "Emma Wilson",
+          authorAvatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=emma",
+          content: "This is exactly what I was looking for! Do you have any resources on content planning?",
+          postTitle: "The Ultimate Guide to Social Media Strategy",
+          timestamp: new Date(Date.now() - 6 * 60 * 60 * 1000).toISOString(), // 6 hours ago
+          isRead: true,
+          sentiment: "positive",
+          priority: "medium"
+        }
+      ];
+
+      const unreadCount = items.filter(item => !item.isRead).length;
+
+      res.json({ 
+        success: true,
+        data: { 
+          items, 
+          unreadCount,
+          totalCount: items.length
+        }
+      });
+    } catch (error) {
+      console.error("Inbox error:", error);
+      res.status(500).json({ success: false, error: "Failed to fetch inbox" });
+    }
+  });
+
+  // Legacy endpoint for backward compatibility
   app.get("/api/inbox/messages", async (req, res) => {
     try {
       // Mock engagement data
@@ -297,6 +456,26 @@ export function registerRoutes(app: Express) {
     }
   });
 
+  // Configuration check endpoint
+  app.get("/api/config/check", async (req, res) => {
+    try {
+      const config = {
+        ayrshareApiKey: !!AYRSHARE_API_KEY,
+        databaseUrl: !!process.env.DATABASE_URL,
+        sessionSecret: !!process.env.SESSION_SECRET
+      };
+      
+      res.json({ 
+        success: true, 
+        config,
+        ready: Object.values(config).every(Boolean)
+      });
+    } catch (error) {
+      console.error("Config check error:", error);
+      res.status(500).json({ success: false, error: "Failed to check configuration" });
+    }
+  });
+
   // Mock activity feed endpoint
   app.get("/api/activity", async (req, res) => {
     try {
@@ -337,30 +516,110 @@ export function registerRoutes(app: Express) {
   return server;
 }
 
-// Mock Ayrshare API functions
-async function mockAyrsharePost(postData: any) {
-  // Simulate API delay
-  await new Promise(resolve => setTimeout(resolve, 500));
-  
-  // Mock successful response
-  return {
-    status: "success",
-    ids: {
-      twitter: "twitter_123",
-      linkedin: "linkedin_456",
-      facebook: "facebook_789",
-      instagram: "instagram_101"
-    },
-    postId: `ayrshare_${Date.now()}`
-  };
+// Ayrshare API configuration
+const AYRSHARE_API_KEY = process.env.AYRSHARE_API_KEY;
+const AYRSHARE_BASE_URL = 'https://app.ayrshare.com/api';
+
+// Real Ayrshare API functions
+async function ayrsharePost(postData: any) {
+  try {
+    const response = await fetch(`${AYRSHARE_BASE_URL}/post`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${AYRSHARE_API_KEY}`
+      },
+      body: JSON.stringify({
+        post: postData.post,
+        platforms: postData.platforms,
+        scheduleDate: postData.scheduleDate,
+        mediaUrls: postData.mediaUrls
+      })
+    });
+
+    const data = await response.json();
+    
+    if (!response.ok) {
+      return {
+        status: "error",
+        errors: data.errors || [`API Error: ${response.status}`]
+      };
+    }
+
+    return {
+      status: "success",
+      ids: data.ids || {},
+      postId: data.id || `ayrshare_${Date.now()}`
+    };
+  } catch (error) {
+    console.error('Ayrshare API Error:', error);
+    return {
+      status: "error",
+      errors: [`Network error: ${error.message}`]
+    };
+  }
 }
 
-async function mockAyrshareDelete(postId: string) {
-  // Simulate API delay
-  await new Promise(resolve => setTimeout(resolve, 300));
-  
-  return {
-    status: "success",
-    message: `Post ${postId} deleted successfully`
-  };
+async function ayrshareDelete(postId: string) {
+  try {
+    const response = await fetch(`${AYRSHARE_BASE_URL}/post`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${AYRSHARE_API_KEY}`
+      },
+      body: JSON.stringify({ id: postId })
+    });
+
+    const data = await response.json();
+    
+    if (!response.ok) {
+      return {
+        status: "error",
+        error: data.error || `API Error: ${response.status}`
+      };
+    }
+
+    return {
+      status: "success",
+      message: data.message || `Post ${postId} deleted successfully`
+    };
+  } catch (error) {
+    console.error('Ayrshare Delete Error:', error);
+    return {
+      status: "error",
+      error: `Network error: ${error.message}`
+    };
+  }
+}
+
+async function ayrshareHistory() {
+  try {
+    const response = await fetch(`${AYRSHARE_BASE_URL}/history`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${AYRSHARE_API_KEY}`
+      }
+    });
+
+    const data = await response.json();
+    
+    if (!response.ok) {
+      return {
+        status: "error",
+        error: data.error || `API Error: ${response.status}`
+      };
+    }
+
+    return {
+      status: "success",
+      data: data.posts || []
+    };
+  } catch (error) {
+    console.error('Ayrshare History Error:', error);
+    return {
+      status: "error",
+      error: `Network error: ${error.message}`
+    };
+  }
 }
