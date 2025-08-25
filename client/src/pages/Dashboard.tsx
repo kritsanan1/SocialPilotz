@@ -1,160 +1,103 @@
-import Layout from '@/components/Layout';
-import StatsOverview from '@/components/StatsOverview';
-import PostComposer from '@/components/PostComposer';
-import ActivityFeed from '@/components/ActivityFeed';
-import AnalyticsPreview from '@/components/AnalyticsPreview';
-import CalendarPreview from '@/components/CalendarPreview';
-import BulkPostManager from '@/components/BulkPostManager';
-import ScheduledPostsList from '@/components/ScheduledPostsList';
-import { Plus, PenTool, Calendar, BarChart, Target, Bell } from 'lucide-react';
 
-export default function Dashboard() {
+import React from 'react';
+import { Calendar, TrendingUp, Users, BarChart3, Clock, MessageSquare, Target, Zap } from 'lucide-react';
+import StatsOverview from '../components/StatsOverview';
+import ActivityFeed from '../components/ActivityFeed';
+import ScheduledPostsList from '../components/ScheduledPostsList';
+import AnalyticsPreview from '../components/AnalyticsPreview';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
+import { Button } from '../components/ui/button';
+import { Badge } from '../components/ui/badge';
+
+const Dashboard = () => {
   const quickActions = [
-    {
-      icon: PenTool,
-      title: 'New Content Idea',
-      description: 'Capture inspiration',
-      color: 'bg-emerald-500',
-      action: 'create-idea'
-    },
-    {
-      icon: Plus,
-      title: 'Publish Content',
-      description: 'Post publication',
-      color: 'bg-blue-500',
-      action: 'publish-content'
-    },
-    {
-      icon: Calendar,
-      title: 'Create Schedule',
-      description: 'Start new project',
-      color: 'bg-purple-500',
-      action: 'create-schedule'
-    },
-    {
-      icon: BarChart,
-      title: 'View Analytics',
-      description: 'Check performance',
-      color: 'bg-orange-500',
-      action: 'view-analytics'
-    }
+    { icon: MessageSquare, label: 'Create Post', color: 'bg-blue-500', href: '#' },
+    { icon: Calendar, label: 'Schedule', color: 'bg-green-500', href: '#' },
+    { icon: BarChart3, label: 'Analytics', color: 'bg-purple-500', href: '/analytics' },
+    { icon: Users, label: 'Audience', color: 'bg-orange-500', href: '#' },
   ];
 
-  const upcomingDeadlines = [
-    {
-      title: 'LinkedIn Article: "AI in Marketing"',
-      time: 'Today at 2:00 PM',
-      type: 'high',
-      platform: 'LinkedIn'
-    },
-    {
-      title: 'Blog Post: Product Update',
-      time: 'Tomorrow at 10:00 AM',
-      type: 'medium',
-      platform: 'Blog'
-    },
-    {
-      title: 'Newsletter: Weekly Insights',
-      time: 'Friday at 9:00 AM',
-      type: 'low',
-      platform: 'Email'
-    }
+  const insights = [
+    { title: 'Best Time to Post', value: '2:00 PM EST', trend: '+12%', icon: Clock },
+    { title: 'Top Platform', value: 'LinkedIn', trend: '+8%', icon: Target },
+    { title: 'Engagement Rate', value: '4.2%', trend: '+15%', icon: TrendingUp },
+    { title: 'Active Followers', value: '2.4K', trend: '+6%', icon: Users },
   ];
 
   return (
-    <Layout>
-      <div className="px-4 py-4">
-        {/* Welcome Header */}
-        <div className="mb-6">
-          <h1 className="text-2xl font-bold text-neutral-900 mb-1">
-            Good morning, Sarah
-          </h1>
-          <p className="text-neutral-600">
-            Let's make today's content publishing productive and strategic.
-          </p>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
+      <div className="max-w-7xl mx-auto p-6 space-y-8">
+        {/* Header Section */}
+        <div className="bg-white rounded-2xl p-8 shadow-sm border border-slate-200/60">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-3xl font-bold text-slate-900 mb-2">
+                Good morning, Sarah! 👋
+              </h1>
+              <p className="text-slate-600 text-lg">
+                Ready to create some amazing content today?
+              </p>
+            </div>
+            <div className="flex items-center space-x-3">
+              <Badge variant="outline" className="px-4 py-2 bg-green-50 text-green-700 border-green-200">
+                <Zap className="w-4 h-4 mr-1" />
+                All Systems Active
+              </Badge>
+            </div>
+          </div>
         </div>
 
+        {/* Quick Actions */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          {quickActions.map((action, index) => (
+            <Card key={index} className="group hover:shadow-lg transition-all duration-300 cursor-pointer border-0 bg-white/80 backdrop-blur-sm">
+              <CardContent className="p-6 text-center">
+                <div className={`w-12 h-12 ${action.color} rounded-xl flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform duration-200`}>
+                  <action.icon className="w-6 h-6 text-white" />
+                </div>
+                <h3 className="font-semibold text-slate-900">{action.label}</h3>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+
+        {/* Stats Overview */}
         <StatsOverview />
 
-        {/* Quick Actions and Upcoming Deadlines */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-          {/* Quick Actions */}
-          <div className="bg-white rounded-xl shadow-soft border border-neutral-200 p-4">
-            <h3 className="text-lg font-semibold text-neutral-900 mb-4">Quick Actions</h3>
-            <div className="grid grid-cols-2 gap-3">
-              {quickActions.map((action, index) => {
-                const Icon = action.icon;
-                return (
-                  <button
-                    key={index}
-                    className="p-4 border border-neutral-200 rounded-xl hover:border-neutral-300 hover:shadow-soft transition-all duration-200 text-left group"
-                    data-testid={`quick-action-${action.action}`}
-                  >
-                    <div className={`w-10 h-10 ${action.color} rounded-lg flex items-center justify-center mb-3 group-hover:scale-105 transition-transform`}>
-                      <Icon className="w-5 h-5 text-white" />
-                    </div>
-                    <div className="font-medium text-neutral-900 text-sm mb-1">
-                      {action.title}
-                    </div>
-                    <div className="text-xs text-neutral-500">
-                      {action.description}
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* Upcoming Deadlines */}
-          <div className="bg-white rounded-xl shadow-soft border border-neutral-200 p-4">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-neutral-900">Upcoming Deadlines</h3>
-              <Bell className="w-5 h-5 text-neutral-400" />
-            </div>
-            <div className="space-y-3">
-              {upcomingDeadlines.map((deadline, index) => (
-                <div 
-                  key={index}
-                  className="flex items-start space-x-3 p-3 border border-neutral-200 rounded-lg hover:bg-neutral-50 transition-colors"
-                  data-testid={`deadline-${index}`}
-                >
-                  <div className={`w-2 h-2 rounded-full mt-2 ${
-                    deadline.type === 'high' ? 'bg-red-500' :
-                    deadline.type === 'medium' ? 'bg-yellow-500' : 'bg-green-500'
-                  }`} />
-                  <div className="flex-1 min-w-0">
-                    <div className="font-medium text-neutral-900 text-sm mb-1">
-                      {deadline.title}
-                    </div>
-                    <div className="text-xs text-neutral-500">
-                      {deadline.time} • {deadline.platform}
-                    </div>
-                  </div>
+        {/* Insights Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {insights.map((insight, index) => (
+            <Card key={index} className="bg-white/90 backdrop-blur-sm border-0 shadow-sm hover:shadow-md transition-all duration-300">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <insight.icon className="w-8 h-8 text-slate-600" />
+                  <Badge variant="outline" className="text-green-600 bg-green-50 border-green-200">
+                    {insight.trend}
+                  </Badge>
                 </div>
-              ))}
-            </div>
-          </div>
+                <h3 className="text-2xl font-bold text-slate-900 mb-1">{insight.value}</h3>
+                <p className="text-sm text-slate-600">{insight.title}</p>
+              </CardContent>
+            </Card>
+          ))}
         </div>
 
-        <div className="grid gap-6 md:grid-cols-1 lg:grid-cols-3">
-          <div className="lg:col-span-2">
-            <PostComposer />
-          </div>
-          <div className="space-y-6">
-            <CalendarPreview />
+        {/* Main Content Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Left Column - Analytics */}
+          <div className="lg:col-span-2 space-y-6">
             <AnalyticsPreview />
+            <ActivityFeed />
           </div>
-        </div>
 
-        <div className="grid gap-6 md:grid-cols-1">
-          <BulkPostManager />
-        </div>
-
-        <div className="grid gap-6 md:grid-cols-1 lg:grid-cols-2">
-          <ActivityFeed />
-          <ScheduledPostsList />
+          {/* Right Column - Scheduled Posts */}
+          <div className="space-y-6">
+            <ScheduledPostsList />
+          </div>
         </div>
       </div>
-    </Layout>
+    </div>
   );
-}
+};
+
+export default Dashboard;

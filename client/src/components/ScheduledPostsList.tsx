@@ -1,152 +1,195 @@
 
-import { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Calendar, Clock, Trash2, Edit } from 'lucide-react';
-import { showSuccessToast, showErrorToast } from '@/components/ui/toast-messages';
+import React, { useState } from 'react';
+import { Calendar, Clock, MoreVertical, Edit, Trash2, Send, Eye } from 'lucide-react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
+import { Badge } from './ui/badge';
+import { Button } from './ui/button';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from './ui/dropdown-menu';
+import { Avatar } from './ui/avatar';
 
 interface ScheduledPost {
   id: string;
-  post: string;
+  content: string;
   platforms: string[];
-  scheduleDate: string;
-  status: string;
-  mediaUrls?: string[];
-  createdAt: string;
+  scheduledTime: string;
+  status: 'scheduled' | 'publishing' | 'failed';
+  image?: string;
 }
 
-export default function ScheduledPostsList() {
-  const [posts, setPosts] = useState<ScheduledPost[]>([]);
-  const [loading, setLoading] = useState(true);
+const ScheduledPostsList = () => {
+  const [posts, setPosts] = useState<ScheduledPost[]>([
+    {
+      id: '1',
+      content: 'Excited to share our latest product update! 🚀 The new analytics dashboard is now live with real-time insights and improved user experience.',
+      platforms: ['linkedin', 'twitter'],
+      scheduledTime: '2025-01-16T14:00:00Z',
+      status: 'scheduled',
+    },
+    {
+      id: '2',
+      content: 'Join us for our upcoming webinar on AI trends in 2025. Register now and get insights from industry experts! #AI #Tech #Innovation',
+      platforms: ['linkedin', 'facebook'],
+      scheduledTime: '2025-01-17T10:30:00Z',
+      status: 'scheduled',
+    },
+    {
+      id: '3',
+      content: 'Behind the scenes: How we built our new feature using cutting-edge technology and user feedback. Thread 🧵',
+      platforms: ['twitter'],
+      scheduledTime: '2025-01-17T16:15:00Z',
+      status: 'publishing',
+    },
+  ]);
 
-  useEffect(() => {
-    fetchScheduledPosts();
-  }, []);
-
-  const fetchScheduledPosts = async () => {
-    try {
-      const response = await fetch('/api/posts/scheduled');
-      const data = await response.json();
-      
-      if (data.success) {
-        setPosts(data.data.posts);
-      } else {
-        showErrorToast('Failed to load scheduled posts');
-      }
-    } catch (error) {
-      console.error('Error fetching scheduled posts:', error);
-      showErrorToast('Error loading scheduled posts');
-    } finally {
-      setLoading(false);
-    }
+  const platformColors: Record<string, string> = {
+    linkedin: 'bg-blue-600',
+    twitter: 'bg-black',
+    facebook: 'bg-blue-500',
+    instagram: 'bg-pink-500',
   };
 
-  const deletePost = async (postId: string) => {
-    try {
-      const response = await fetch(`/api/posts/${postId}`, {
-        method: 'DELETE',
-      });
-      
-      const data = await response.json();
-      
-      if (data.success) {
-        setPosts(posts.filter(post => post.id !== postId));
-        showSuccessToast('Post deleted successfully');
-      } else {
-        showErrorToast(data.error || 'Failed to delete post');
-      }
-    } catch (error) {
-      console.error('Error deleting post:', error);
-      showErrorToast('Error deleting post');
+  const platformIcons: Record<string, string> = {
+    linkedin: 'L',
+    twitter: 'X',
+    facebook: 'f',
+    instagram: 'I',
+  };
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'scheduled':
+        return 'bg-blue-50 text-blue-700 border-blue-200';
+      case 'publishing':
+        return 'bg-yellow-50 text-yellow-700 border-yellow-200';
+      case 'failed':
+        return 'bg-red-50 text-red-700 border-red-200';
+      default:
+        return 'bg-gray-50 text-gray-700 border-gray-200';
     }
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleString();
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffTime = date.getTime() - now.getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+    if (diffDays === 0) return 'Today';
+    if (diffDays === 1) return 'Tomorrow';
+    if (diffDays < 7) return `In ${diffDays} days`;
+    return date.toLocaleDateString();
   };
 
-  const getPlatformColor = (platform: string) => {
-    const colors: Record<string, string> = {
-      twitter: 'bg-blue-500',
-      linkedin: 'bg-blue-600', 
-      facebook: 'bg-blue-800',
-      instagram: 'bg-pink-500',
-      reddit: 'bg-orange-500',
-      telegram: 'bg-sky-500'
-    };
-    return colors[platform] || 'bg-gray-500';
+  const formatTime = (dateString: string) => {
+    return new Date(dateString).toLocaleTimeString('en-US', { 
+      hour: 'numeric', 
+      minute: '2-digit',
+      hour12: true 
+    });
   };
 
-  if (loading) {
-    return <div className="text-center py-8">Loading scheduled posts...</div>;
-  }
+  const truncateContent = (content: string, maxLength: number = 120) => {
+    return content.length > maxLength ? `${content.substring(0, maxLength)}...` : content;
+  };
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h3 className="text-lg font-semibold">Scheduled Posts ({posts.length})</h3>
-        <Button variant="outline" onClick={fetchScheduledPosts}>
-          Refresh
-        </Button>
-      </div>
-
-      {posts.length === 0 ? (
-        <Card>
-          <CardContent className="text-center py-8">
-            <Calendar className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-            <p className="text-gray-500">No scheduled posts yet</p>
-          </CardContent>
-        </Card>
-      ) : (
-        posts.map((post) => (
-          <Card key={post.id} className="hover:shadow-md transition-shadow">
-            <CardHeader className="pb-3">
-              <div className="flex items-start justify-between">
-                <div className="flex-1">
-                  <CardTitle className="text-sm font-medium mb-2">
-                    {post.post.substring(0, 100)}
-                    {post.post.length > 100 && '...'}
-                  </CardTitle>
-                  <div className="flex items-center gap-2 text-sm text-gray-500">
-                    <Clock className="w-4 h-4" />
-                    <span>Scheduled for {formatDate(post.scheduleDate)}</span>
-                  </div>
-                </div>
-                <div className="flex gap-2">
-                  <Button variant="outline" size="sm">
-                    <Edit className="w-4 h-4" />
-                  </Button>
-                  <Button 
-                    variant="outline" 
-                    size="sm"
-                    onClick={() => deletePost(post.id)}
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </Button>
+    <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-lg h-fit">
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 text-xl">
+          <Calendar className="w-6 h-6 text-purple-600" />
+          Scheduled Posts
+        </CardTitle>
+        <CardDescription>
+          {posts.length} posts ready to publish
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        {posts.map((post) => (
+          <div
+            key={post.id}
+            className="group p-4 rounded-xl border border-slate-200 bg-gradient-to-br from-white to-slate-50 hover:shadow-md transition-all duration-200"
+          >
+            {/* Header */}
+            <div className="flex items-start justify-between mb-3">
+              <div className="flex items-center gap-2">
+                <Badge variant="outline" className={getStatusColor(post.status)}>
+                  {post.status === 'publishing' && (
+                    <div className="w-2 h-2 bg-current rounded-full animate-pulse mr-1" />
+                  )}
+                  {post.status.charAt(0).toUpperCase() + post.status.slice(1)}
+                </Badge>
+                <div className="flex items-center gap-1 text-xs text-slate-500">
+                  <Clock className="w-3 h-3" />
+                  {formatDate(post.scheduledTime)} at {formatTime(post.scheduledTime)}
                 </div>
               </div>
-            </CardHeader>
-            <CardContent>
-              <div className="flex flex-wrap gap-2">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="sm" className="opacity-0 group-hover:opacity-100 transition-opacity">
+                    <MoreVertical className="w-4 h-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem>
+                    <Eye className="w-4 h-4 mr-2" />
+                    Preview
+                  </DropdownMenuItem>
+                  <DropdownMenuItem>
+                    <Edit className="w-4 h-4 mr-2" />
+                    Edit
+                  </DropdownMenuItem>
+                  <DropdownMenuItem>
+                    <Send className="w-4 h-4 mr-2" />
+                    Post Now
+                  </DropdownMenuItem>
+                  <DropdownMenuItem className="text-red-600">
+                    <Trash2 className="w-4 h-4 mr-2" />
+                    Delete
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+
+            {/* Content */}
+            <p className="text-sm text-slate-700 mb-4 leading-relaxed">
+              {truncateContent(post.content)}
+            </p>
+
+            {/* Platforms */}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-slate-500 mr-1">Posting to:</span>
                 {post.platforms.map((platform) => (
-                  <Badge 
+                  <div
                     key={platform}
-                    className={`text-white ${getPlatformColor(platform)}`}
+                    className={`w-6 h-6 ${platformColors[platform]} rounded-md flex items-center justify-center text-white text-xs font-bold shadow-sm`}
+                    title={platform.charAt(0).toUpperCase() + platform.slice(1)}
                   >
-                    {platform}
-                  </Badge>
+                    {platformIcons[platform]}
+                  </div>
                 ))}
               </div>
-              {post.mediaUrls && post.mediaUrls.length > 0 && (
-                <div className="mt-3 text-sm text-gray-500">
-                  📎 {post.mediaUrls.length} media file(s) attached
-                </div>
+              {post.status === 'scheduled' && (
+                <Button variant="ghost" size="sm" className="text-xs text-blue-600 hover:text-blue-700">
+                  Reschedule
+                </Button>
               )}
-            </CardContent>
-          </Card>
-        ))
-      )}
-    </div>
+            </div>
+          </div>
+        ))}
+
+        {posts.length === 0 && (
+          <div className="text-center py-8">
+            <Calendar className="w-12 h-12 text-slate-300 mx-auto mb-3" />
+            <p className="text-slate-500">No scheduled posts</p>
+            <Button variant="outline" size="sm" className="mt-2">
+              Schedule Your First Post
+            </Button>
+          </div>
+        )}
+      </CardContent>
+    </Card>
   );
-}
+};
+
+export default ScheduledPostsList;

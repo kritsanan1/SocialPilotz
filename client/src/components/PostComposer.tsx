@@ -1,365 +1,188 @@
-import React, { useState, useEffect } from 'react';
+
+import React, { useState } from 'react';
+import { Send, Image, Calendar, Zap, X, Plus, Hash, Smile } from 'lucide-react';
 import { Button } from './ui/button';
 import { Textarea } from './ui/textarea';
-import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import { Badge } from './ui/badge';
-import { Input } from './ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
-import { Calendar, Image, Send, Clock, Hash, Sparkles, BarChart3, Target, CheckCircle2, AlertCircle, X } from 'lucide-react';
-import { showSuccessToast, showErrorToast, showWarningToast } from '@/components/ui/toast-messages';
+import { Switch } from './ui/switch';
+import { Label } from './ui/label';
+import { Separator } from './ui/separator';
 
-interface SocialPlatform {
+interface Platform {
   id: string;
   name: string;
   color: string;
+  icon: string;
   enabled: boolean;
 }
 
-const socialPlatforms: SocialPlatform[] = [
-  { id: 'twitter', name: 'Twitter', color: 'bg-blue-500', enabled: true },
-  { id: 'linkedin', name: 'LinkedIn', color: 'bg-blue-600', enabled: true },
-  { id: 'facebook', name: 'Facebook', color: 'bg-blue-700', enabled: true },
-  { id: 'instagram', name: 'Instagram', color: 'bg-pink-500', enabled: false },
-  { id: 'bluesky', name: 'Bluesky', color: 'bg-sky-500', enabled: true },
-];
-
-export default function PostComposer() {
+const PostComposer = () => {
   const [content, setContent] = useState('');
-  const [selectedPlatforms, setSelectedPlatforms] = useState<string[]>(['twitter', 'linkedin']);
-  const [scheduleDate, setScheduleDate] = useState('');
+  const [selectedPlatforms, setSelectedPlatforms] = useState<string[]>(['linkedin', 'twitter']);
+  const [isScheduled, setIsScheduled] = useState(false);
   const [isPosting, setIsPosting] = useState(false);
-  const [postStatus, setPostStatus] = useState<'idle' | 'success' | 'error'>('idle');
-  const [statusMessage, setStatusMessage] = useState('');
-  const [showScheduler, setShowScheduler] = useState(false);
-  const [scheduleTime, setScheduleTime] = useState('');
-  const [mediaUrls, setMediaUrls] = useState<string[]>([]);
-  const [isGeneratingHashtags, setIsGeneratingHashtags] = useState(false);
-  const [suggestedHashtags, setSuggestedHashtags] = useState<string[]>([]);
-  const [contentType, setContentType] = useState('general');
-  const [aiSuggestions, setAiSuggestions] = useState<string[]>([]);
 
-  const platforms = [
-    { id: 'twitter', name: 'Twitter', color: 'bg-blue-500' },
-    { id: 'facebook', name: 'Facebook', color: 'bg-blue-600' },
-    { id: 'instagram', name: 'Instagram', color: 'bg-pink-500' },
-    { id: 'linkedin', name: 'LinkedIn', color: 'bg-blue-700' },
-    { id: 'tiktok', name: 'TikTok', color: 'bg-gray-900' },
-    { id: 'youtube', name: 'YouTube', color: 'bg-red-600' },
-    { id: 'threads', name: 'Threads', color: 'bg-gray-800' },
-    { id: 'bluesky', name: 'Bluesky', color: 'bg-sky-500' },
+  const platforms: Platform[] = [
+    { id: 'linkedin', name: 'LinkedIn', color: 'bg-blue-600', icon: 'L', enabled: true },
+    { id: 'twitter', name: 'Twitter', color: 'bg-black', icon: 'X', enabled: true },
+    { id: 'facebook', name: 'Facebook', color: 'bg-blue-500', icon: 'f', enabled: true },
+    { id: 'instagram', name: 'Instagram', color: 'bg-gradient-to-br from-pink-500 to-orange-400', icon: 'I', enabled: false },
   ];
-
-  const contentTypes = [
-    { value: 'general', label: 'General Content' },
-    { value: 'promotional', label: 'Promotional' },
-    { value: 'educational', label: 'Educational' },
-    { value: 'entertainment', label: 'Entertainment' },
-    { value: 'news', label: 'News & Updates' },
-    { value: 'personal', label: 'Personal Story' },
-  ];
-
-  const generateHashtags = async () => {
-    if (!content.trim()) return;
-
-    setIsGeneratingHashtags(true);
-    try {
-      const response = await fetch('/api/content/auto-hashtags', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ post: content }),
-      });
-
-      const result = await response.json();
-      if (result.success) {
-        setSuggestedHashtags(result.data.hashtags || []);
-      }
-    } catch (error) {
-      console.error('Error generating hashtags:', error);
-      showErrorToast('Failed to generate hashtags. Please try again.');
-    } finally {
-      setIsGeneratingHashtags(false);
-    }
-  };
-
-  const addHashtag = (hashtag: string) => {
-    if (!content.includes(hashtag)) {
-      setContent(prev => prev + ' ' + hashtag);
-    }
-  };
-
-  useEffect(() => {
-    if (content.length > 50) {
-      const timer = setTimeout(generateHashtags, 2000);
-      return () => clearTimeout(timer);
-    }
-  }, [content]);
 
   const handlePlatformToggle = (platformId: string) => {
-    setSelectedPlatforms(prev =>
-      prev.includes(platformId)
+    setSelectedPlatforms(prev => 
+      prev.includes(platformId) 
         ? prev.filter(id => id !== platformId)
         : [...prev, platformId]
     );
   };
 
   const handlePost = async () => {
-    if (!content.trim()) {
-      showWarningToast('Please enter some content to post.');
-      return;
-    }
-
-    if (selectedPlatforms.length === 0) {
-      showWarningToast('Please select at least one platform.');
-      return;
-    }
-
-    if (showScheduler && (!scheduleDate || !scheduleTime)) {
-      showWarningToast('Please select both date and time for scheduling.');
-      return;
-    }
-
     setIsPosting(true);
-    setPostStatus('idle');
-
-    try {
-      const payload = {
-        post: content,
-        platforms: selectedPlatforms,
-        ...(scheduleDate && scheduleTime && { scheduleDateTime: `${scheduleDate}T${scheduleTime}:00` })
-      };
-
-      const response = await fetch('/api/social/post', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(payload)
-      });
-
-      const result = await response.json();
-
-      if (result.success) {
-        setPostStatus('success');
-        setStatusMessage(scheduleDate ? 'Post scheduled successfully!' : 'Post published successfully!');
-        showSuccessToast(scheduleDate ? 'Post scheduled successfully!' : 'Post published successfully!');
-        setContent('');
-        setScheduleDate('');
-        setScheduleTime('');
-        setShowScheduler(false);
-        setSuggestedHashtags([]);
-      } else {
-        setPostStatus('error');
-        setStatusMessage(result.error || 'Failed to post content');
-        showErrorToast(result.error || 'Failed to post content');
-      }
-    } catch (error) {
-      setPostStatus('error');
-      setStatusMessage('Network error. Please try again.');
-      showErrorToast('Network error. Please try again.');
-    } finally {
-      setIsPosting(false);
-    }
+    // Simulate posting delay
+    await new Promise(resolve => setTimeout(resolve, 2000));
+    setIsPosting(false);
+    setContent('');
   };
 
-  const clearStatus = () => {
-    setPostStatus('idle');
-    setStatusMessage('');
-  };
-
-  const togglePlatform = (platformId: string) => {
-    setSelectedPlatforms(prevSelected =>
-      prevSelected.includes(platformId)
-        ? prevSelected.filter(id => id !== platformId)
-        : [...prevSelected, platformId]
-    );
-  };
+  const characterCount = content.length;
+  const maxChars = 280; // Twitter limit as baseline
 
   return (
-    <Card className="w-full max-w-xl mx-auto my-8 shadow-lg border-neutral-200">
-      <CardHeader>
-        <CardTitle className="text-xl font-semibold text-neutral-800">Create a New Post</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="space-y-4">
-          <div className="flex items-center gap-2 mb-4">
-            <Select value={contentType} onValueChange={setContentType}>
-              <SelectTrigger className="w-48">
-                <SelectValue placeholder="Content type" />
-              </SelectTrigger>
-              <SelectContent>
-                {contentTypes.map((type) => (
-                  <SelectItem key={type.value} value={type.value}>
-                    {type.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <Button variant="outline" size="sm" onClick={generateHashtags} disabled={isGeneratingHashtags}>
-              <Sparkles className="w-4 h-4 mr-2" />
-              {isGeneratingHashtags ? 'Generating...' : 'AI Assist'}
-            </Button>
+    <Card className="w-full max-w-2xl mx-auto shadow-lg border-0 bg-white/95 backdrop-blur-sm">
+      <CardHeader className="pb-4">
+        <CardTitle className="flex items-center gap-2 text-xl">
+          <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+            <Zap className="w-4 h-4 text-white" />
           </div>
+          Create New Post
+        </CardTitle>
+        <CardDescription>
+          Compose and share across all your connected platforms
+        </CardDescription>
+      </CardHeader>
 
-          <Textarea
-            placeholder="What's on your mind?"
-            value={content}
-            onChange={(e) => setContent(e.target.value)}
-            className="min-h-[120px] resize-none border-0 text-base placeholder:text-gray-400 focus-visible:ring-0"
-            onBlur={() => {
-              if (content.trim() && selectedPlatforms.length === 0) {
-                showWarningToast('Please select at least one platform to post.');
-              }
-            }}
-          />
-
-          {suggestedHashtags.length > 0 && (
-            <div className="p-3 bg-blue-50 rounded-lg">
-              <p className="text-sm font-medium text-blue-700 mb-2">Suggested hashtags:</p>
-              <div className="flex flex-wrap gap-2">
-                {suggestedHashtags.map((hashtag, index) => (
-                  <Badge
-                    key={index}
-                    variant="secondary"
-                    className="cursor-pointer hover:bg-blue-100"
-                    onClick={() => addHashtag(hashtag)}
-                  >
-                    {hashtag}
-                  </Badge>
-                ))}
-              </div>
-            </div>
-          )}
-
-          <div className="flex flex-wrap gap-2">
+      <CardContent className="space-y-6">
+        {/* Platform Selection */}
+        <div className="space-y-3">
+          <Label className="text-sm font-medium text-slate-700">Select Platforms</Label>
+          <div className="flex flex-wrap gap-3">
             {platforms.map((platform) => (
-              <button
+              <div
                 key={platform.id}
-                onClick={() => togglePlatform(platform.id)}
-                className={`px-3 py-1 rounded-full text-sm transition-all ${
-                  selectedPlatforms.includes(platform.id)
-                    ? `${platform.color} text-white`
-                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                }`}
+                className={`relative cursor-pointer transition-all duration-200 ${
+                  selectedPlatforms.includes(platform.id) ? 'scale-105' : 'hover:scale-105'
+                } ${!platform.enabled ? 'opacity-50 cursor-not-allowed' : ''}`}
+                onClick={() => platform.enabled && handlePlatformToggle(platform.id)}
               >
-                {platform.name}
-              </button>
+                <div className={`w-12 h-12 ${platform.color} rounded-xl flex items-center justify-center text-white font-bold shadow-lg ${
+                  selectedPlatforms.includes(platform.id) ? 'ring-4 ring-blue-200' : ''
+                }`}>
+                  {platform.icon}
+                </div>
+                {selectedPlatforms.includes(platform.id) && (
+                  <div className="absolute -top-2 -right-2 w-5 h-5 bg-green-500 rounded-full flex items-center justify-center">
+                    <Plus className="w-3 h-3 text-white rotate-45" />
+                  </div>
+                )}
+                {!platform.enabled && (
+                  <div className="absolute inset-0 bg-slate-400/50 rounded-xl flex items-center justify-center">
+                    <X className="w-4 h-4 text-slate-600" />
+                  </div>
+                )}
+              </div>
             ))}
           </div>
+          <div className="flex flex-wrap gap-2 mt-2">
+            {selectedPlatforms.map(platformId => {
+              const platform = platforms.find(p => p.id === platformId);
+              return platform ? (
+                <Badge key={platformId} variant="secondary" className="bg-blue-50 text-blue-700">
+                  {platform.name}
+                </Badge>
+              ) : null;
+            })}
+          </div>
+        </div>
 
-          {/* Status Messages */}
-          {postStatus !== 'idle' && (
-            <div className={`p-3 rounded-lg flex items-center justify-between ${
-              postStatus === 'success'
-                ? 'bg-green-50 border border-green-200'
-                : 'bg-red-50 border border-red-200'
-            }`}>
-              <div className="flex items-center space-x-2">
-                {postStatus === 'success' ? (
-                  <CheckCircle2 className="w-4 h-4 text-green-600" />
-                ) : (
-                  <AlertCircle className="w-4 h-4 text-red-600" />
-                )}
-                <span className={`text-sm font-medium ${
-                  postStatus === 'success' ? 'text-green-800' : 'text-red-800'
-                }`}>
-                  {statusMessage}
-                </span>
-              </div>
-              <button
-                onClick={clearStatus}
-                className={`p-1 rounded hover:bg-opacity-20 ${
-                  postStatus === 'success' ? 'hover:bg-green-600' : 'hover:bg-red-600'
-                }`}
-              >
-                <X className="w-3 h-3" />
-              </button>
-            </div>
-          )}
+        <Separator />
 
-
-          <div className="flex justify-between items-center pt-4 border-t border-gray-100">
-            <div className="flex gap-2">
-              <Button variant="outline" size="sm">
-                <Image className="w-4 h-4 mr-2" />
-                Media
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setShowScheduler(!showScheduler)}
-              >
-                <Clock className="w-4 h-4 mr-2" />
-                Schedule
-              </Button>
-              <Button variant="outline" size="sm">
-                <BarChart3 className="w-4 h-4 mr-2" />
-                Analytics
-              </Button>
-            </div>
-
-            <div className="flex gap-2">
-              <Button variant="outline" size="sm">
-                <Target className="w-4 h-4" />
-              </Button>
-              <Button 
-                onClick={handlePost}
-                disabled={!content.trim() || selectedPlatforms.length === 0 || isPosting}
-              >
-                {isPosting ? (
-                  <>
-                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                    <span className="ml-2">Posting...</span>
-                  </>
-                ) : (
-                  <>
-                    <Send className="w-4 h-4 mr-2" />
-                    Post Now
-                  </>
-                )}
-              </Button>
+        {/* Content Input */}
+        <div className="space-y-3">
+          <div className="flex items-center justify-between">
+            <Label className="text-sm font-medium text-slate-700">Content</Label>
+            <div className={`text-xs ${characterCount > maxChars ? 'text-red-500' : 'text-slate-500'}`}>
+              {characterCount}/{maxChars}
             </div>
           </div>
+          <Textarea
+            placeholder="What's happening? Share your thoughts..."
+            value={content}
+            onChange={(e) => setContent(e.target.value)}
+            className="min-h-[120px] resize-none border-slate-200 focus:border-blue-400 focus:ring-blue-400/20 text-base"
+          />
+        </div>
 
-          {showScheduler && (
-            <div className="p-4 bg-gray-50 rounded-lg border-t space-y-3">
-              <p className="text-sm font-medium text-gray-700">Schedule for later</p>
-              <div className="grid grid-cols-2 gap-2">
-                <Input
-                  type="date"
-                  value={scheduleDate}
-                  onChange={(e) => setScheduleDate(e.target.value)}
-                  className="text-sm"
-                  onBlur={() => {
-                    if (scheduleDate && !scheduleTime) {
-                      showWarningToast('Please select a time for your scheduled post.');
-                    }
-                  }}
-                />
-                <Input
-                  type="time"
-                  value={scheduleTime}
-                  onChange={(e) => setScheduleTime(e.target.value)}
-                  className="text-sm"
-                  onBlur={() => {
-                    if (scheduleTime && !scheduleDate) {
-                      showWarningToast('Please select a date for your scheduled post.');
-                    }
-                  }}
-                />
-              </div>
-              <div className="flex gap-2">
-                <Button size="sm" className="flex-1" onClick={handlePost} disabled={!content.trim() || selectedPlatforms.length === 0 || isPosting}>
-                  <Calendar className="w-4 h-4 mr-2" />
-                  Schedule Post
-                </Button>
-                <Button variant="outline" size="sm">
-                  Best Time
-                </Button>
-              </div>
+        {/* Content Tools */}
+        <div className="flex items-center justify-between p-4 bg-slate-50 rounded-xl">
+          <div className="flex items-center gap-3">
+            <Button variant="ghost" size="sm" className="text-slate-600 hover:text-blue-600">
+              <Image className="w-4 h-4 mr-1" />
+              Media
+            </Button>
+            <Button variant="ghost" size="sm" className="text-slate-600 hover:text-blue-600">
+              <Hash className="w-4 h-4 mr-1" />
+              Tags
+            </Button>
+            <Button variant="ghost" size="sm" className="text-slate-600 hover:text-blue-600">
+              <Smile className="w-4 h-4 mr-1" />
+              Emoji
+            </Button>
+          </div>
+        </div>
+
+        {/* Scheduling Option */}
+        <div className="flex items-center justify-between p-4 border border-slate-200 rounded-xl">
+          <div className="flex items-center gap-3">
+            <Calendar className="w-5 h-5 text-slate-600" />
+            <div>
+              <Label className="text-sm font-medium">Schedule for later</Label>
+              <p className="text-xs text-slate-500">Post at the optimal time</p>
             </div>
-          )}
+          </div>
+          <Switch
+            checked={isScheduled}
+            onCheckedChange={setIsScheduled}
+          />
+        </div>
+
+        {/* Action Buttons */}
+        <div className="flex items-center gap-3 pt-2">
+          <Button
+            onClick={handlePost}
+            disabled={!content.trim() || selectedPlatforms.length === 0 || isPosting}
+            className="flex-1 h-12 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-medium shadow-lg transition-all duration-200"
+          >
+            {isPosting ? (
+              <div className="flex items-center gap-2">
+                <div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin" />
+                Publishing...
+              </div>
+            ) : (
+              <div className="flex items-center gap-2">
+                <Send className="w-4 h-4" />
+                {isScheduled ? 'Schedule Post' : 'Post Now'}
+              </div>
+            )}
+          </Button>
+          <Button variant="outline" className="h-12 px-6">
+            Save Draft
+          </Button>
         </div>
       </CardContent>
     </Card>
   );
-}
+};
+
+export default PostComposer;

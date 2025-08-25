@@ -1,68 +1,139 @@
-import { Clock } from 'lucide-react';
-import type { AnalyticsData } from '@/types';
 
-export default function AnalyticsPreview() {
-  const analytics: AnalyticsData = {
-    totalReach: '47.2K',
-    reachChange: '↗ 18.5%',
-    engagement: '12.8%',
-    engagementChange: '↗ 3.2%',
-    impressions: '47.2K',
-    impressionsChange: '↗ 18.5%',
-    engagementRate: '12.8%',
-    engagementRateChange: '↗ 3.2%',
-    bestTimeToPost: '2:00 PM - 4:00 PM',
-    bestDaysToPost: 'Tuesday & Thursday show highest engagement'
-  };
+import React from 'react';
+import { TrendingUp, Users, MessageSquare, Heart, Share, Eye } from 'lucide-react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
+import { Badge } from './ui/badge';
+import { Progress } from './ui/progress';
+
+const AnalyticsPreview = () => {
+  const metrics = [
+    {
+      title: 'Total Reach',
+      value: '12.4K',
+      change: '+23%',
+      trend: 'up',
+      icon: Eye,
+      color: 'text-blue-600',
+      bgColor: 'bg-blue-50',
+    },
+    {
+      title: 'Engagement',
+      value: '2.8K',
+      change: '+18%',
+      trend: 'up',
+      icon: Heart,
+      color: 'text-red-600',
+      bgColor: 'bg-red-50',
+    },
+    {
+      title: 'Comments',
+      value: '456',
+      change: '+12%',
+      trend: 'up',
+      icon: MessageSquare,
+      color: 'text-green-600',
+      bgColor: 'bg-green-50',
+    },
+    {
+      title: 'Shares',
+      value: '234',
+      change: '+8%',
+      trend: 'up',
+      icon: Share,
+      color: 'text-purple-600',
+      bgColor: 'bg-purple-50',
+    },
+  ];
+
+  const platformPerformance = [
+    { name: 'LinkedIn', engagement: 85, color: 'bg-blue-500', posts: 24 },
+    { name: 'Twitter', engagement: 72, color: 'bg-black', posts: 18 },
+    { name: 'Facebook', engagement: 68, color: 'bg-blue-400', posts: 12 },
+    { name: 'Instagram', engagement: 45, color: 'bg-pink-500', posts: 8 },
+  ];
 
   return (
-    <div className="mt-8">
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="text-lg font-semibold text-neutral-900">Analytics Insights</h2>
-        <button 
-          className="text-sm text-emerald-600 font-medium hover:text-emerald-700 transition-colors"
-          data-testid="button-full-report"
-        >
-          Full Report
-        </button>
-      </div>
+    <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-lg">
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 text-xl">
+          <TrendingUp className="w-6 h-6 text-blue-600" />
+          Analytics Overview
+        </CardTitle>
+        <CardDescription>
+          Your content performance over the last 30 days
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-6">
+        {/* Key Metrics */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          {metrics.map((metric, index) => (
+            <div key={index} className="relative p-4 rounded-xl bg-gradient-to-br from-white to-slate-50 border border-slate-100 hover:shadow-md transition-all duration-200">
+              <div className="flex items-center justify-between mb-3">
+                <div className={`w-10 h-10 ${metric.bgColor} rounded-lg flex items-center justify-center`}>
+                  <metric.icon className={`w-5 h-5 ${metric.color}`} />
+                </div>
+                <Badge variant="outline" className={`${
+                  metric.trend === 'up' ? 'text-green-600 bg-green-50 border-green-200' : 'text-red-600 bg-red-50 border-red-200'
+                }`}>
+                  {metric.change}
+                </Badge>
+              </div>
+              <div className="space-y-1">
+                <h3 className="text-2xl font-bold text-slate-900">{metric.value}</h3>
+                <p className="text-sm text-slate-600">{metric.title}</p>
+              </div>
+            </div>
+          ))}
+        </div>
 
-      <div className="bg-white rounded-xl shadow-soft border border-neutral-200 p-4">
-        <div className="grid grid-cols-2 gap-4 mb-4">
-          <div className="text-center" data-testid="analytics-impressions">
-            <div className="text-2xl font-bold text-neutral-900 mb-1" data-testid="text-impressions-value">
-              {analytics.impressions}
-            </div>
-            <div className="text-sm text-neutral-600">Impressions</div>
-            <div className="text-xs text-emerald-500 font-medium" data-testid="text-impressions-change">
-              {analytics.impressionsChange}
-            </div>
-          </div>
-          <div className="text-center" data-testid="analytics-engagement-rate">
-            <div className="text-2xl font-bold text-neutral-900 mb-1" data-testid="text-engagement-rate-value">
-              {analytics.engagementRate}
-            </div>
-            <div className="text-sm text-neutral-600">Engagement Rate</div>
-            <div className="text-xs text-emerald-500 font-medium" data-testid="text-engagement-rate-change">
-              {analytics.engagementRateChange}
-            </div>
+        {/* Platform Performance */}
+        <div className="space-y-4">
+          <h3 className="font-semibold text-slate-900 text-lg">Platform Performance</h3>
+          <div className="space-y-4">
+            {platformPerformance.map((platform, index) => (
+              <div key={index} className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className={`w-3 h-3 ${platform.color} rounded-full`} />
+                    <span className="font-medium text-slate-900">{platform.name}</span>
+                    <Badge variant="outline" className="text-xs">
+                      {platform.posts} posts
+                    </Badge>
+                  </div>
+                  <span className="text-sm font-medium text-slate-600">
+                    {platform.engagement}%
+                  </span>
+                </div>
+                <Progress value={platform.engagement} className="h-2" />
+              </div>
+            ))}
           </div>
         </div>
 
-        {/* Best Performing Time */}
-        <div className="border-t border-neutral-200 pt-4">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-sm font-medium text-neutral-700">Best Time to Post</span>
-            <Clock className="w-4 h-4 text-neutral-500" />
-          </div>
-          <div className="text-emerald-600 font-semibold" data-testid="text-best-time">
-            {analytics.bestTimeToPost}
-          </div>
-          <div className="text-xs text-neutral-500" data-testid="text-best-days">
-            {analytics.bestDaysToPost}
+        {/* Quick Insights */}
+        <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl p-6 border border-blue-100">
+          <h4 className="font-semibold text-slate-900 mb-3 flex items-center gap-2">
+            <TrendingUp className="w-4 h-4 text-blue-600" />
+            Quick Insights
+          </h4>
+          <div className="space-y-2 text-sm">
+            <div className="flex items-center gap-2">
+              <div className="w-2 h-2 bg-green-500 rounded-full" />
+              <span className="text-slate-700">LinkedIn posts perform 23% better on weekdays</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-2 h-2 bg-blue-500 rounded-full" />
+              <span className="text-slate-700">Best posting time: 2:00 PM EST</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-2 h-2 bg-purple-500 rounded-full" />
+              <span className="text-slate-700">Video content gets 40% more engagement</span>
+            </div>
           </div>
         </div>
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
-}
+};
+
+export default AnalyticsPreview;
