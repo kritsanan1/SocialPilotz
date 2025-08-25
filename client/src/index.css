@@ -60,14 +60,14 @@
     gap: 1rem;
     grid-template-columns: 1fr;
   }
-  
+
   @media (min-width: 640px) {
     .mobile-grid {
       gap: 1.5rem;
       grid-template-columns: repeat(2, 1fr);
     }
   }
-  
+
   @media (min-width: 1024px) {
     .mobile-grid {
       gap: 2rem;
@@ -90,9 +90,11 @@
 @keyframes fadeIn {
   from {
     opacity: 0;
+    transform: translateY(10px);
   }
   to {
     opacity: 1;
+    transform: translateY(0);
   }
 }
 

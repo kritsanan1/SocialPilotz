@@ -1,4 +1,3 @@
-
 import type { Express } from "express";
 import { createServer } from "http";
 import { z } from "zod";
@@ -13,7 +12,7 @@ export function registerRoutes(app: Express) {
   app.post("/api/auth/register", async (req, res) => {
     try {
       const userData = insertUserSchema.parse(req.body);
-      
+
       // Check if user already exists
       const existingUser = await db.select().from(users).where(eq(users.username, userData.username)).limit(1);
       if (existingUser.length > 0) {
@@ -38,7 +37,7 @@ export function registerRoutes(app: Express) {
   app.post("/api/auth/login", async (req, res) => {
     try {
       const { username, password } = req.body;
-      
+
       const [user] = await db.select().from(users).where(eq(users.username, username)).limit(1);
       if (!user || user.password !== password) {
         return res.status(401).json({ message: "Invalid credentials" });
@@ -54,27 +53,27 @@ export function registerRoutes(app: Express) {
 
   // Post history endpoint
   app.get("/api/social/history", async (req, res) => {
+    if (!process.env.AYRSHARE_API_KEY) {
+      return res.status(500).json({ error: 'Ayrshare API key not configured' });
+    }
+
     try {
-      if (!AYRSHARE_API_KEY) {
-        return res.status(500).json({ 
-          success: false, 
-          error: "Ayrshare API key not configured" 
-        });
+      const response = await fetch('https://app.ayrshare.com/api/history', {
+        headers: {
+          'Authorization': `Bearer ${process.env.AYRSHARE_API_KEY}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error(`Ayrshare API error: ${response.statusText}`);
       }
 
-      const historyResponse = await ayrshareHistory();
-      
-      if (historyResponse.status === "success") {
-        res.json({ success: true, data: historyResponse.data });
-      } else {
-        res.status(400).json({ 
-          success: false, 
-          error: historyResponse.error 
-        });
-      }
+      const data = await response.json();
+      res.json(data);
     } catch (error) {
-      console.error("Post history error:", error);
-      res.status(500).json({ success: false, error: "Failed to fetch post history" });
+      console.error('Social history error:', error);
+      res.status(500).json({ error: 'Failed to fetch social media history' });
     }
   });
 
@@ -83,14 +82,14 @@ export function registerRoutes(app: Express) {
     try {
       // Validate API key
       if (!AYRSHARE_API_KEY) {
-        return res.status(500).json({ 
-          success: false, 
-          error: "Ayrshare API key not configured" 
+        return res.status(500).json({
+          success: false,
+          error: "Ayrshare API key not configured"
         });
       }
 
       const { content, platforms, scheduleDate, mediaUrls } = req.body;
-      
+
       // Validate required fields
       if (!content || !platforms || platforms.length === 0) {
         return res.status(400).json({
@@ -98,7 +97,7 @@ export function registerRoutes(app: Express) {
           error: "Content and at least one platform are required"
         });
       }
-      
+
       // Real Ayrshare API call
       const ayrshareResponse = await ayrsharePost({
         post: content,
@@ -122,15 +121,15 @@ export function registerRoutes(app: Express) {
           updatedAt: new Date().toISOString(),
         };
 
-        res.status(201).json({ 
-          success: true, 
+        res.status(201).json({
+          success: true,
           post: postData,
-          ayrshareResponse 
+          ayrshareResponse
         });
       } else {
-        res.status(400).json({ 
-          success: false, 
-          error: ayrshareResponse.errors 
+        res.status(400).json({
+          success: false,
+          error: ayrshareResponse.errors
         });
       }
     } catch (error) {
@@ -138,6 +137,70 @@ export function registerRoutes(app: Express) {
       res.status(500).json({ success: false, error: "Failed to create post" });
     }
   });
+
+  // Post to social media
+  app.post('/api/social/post', async (req, res) => {
+    if (!process.env.AYRSHARE_API_KEY) {
+      return res.status(500).json({ error: 'Ayrshare API key not configured' });
+    }
+
+    try {
+      const { post, platforms, scheduleDate, mediaUrls } = req.body;
+
+      const payload = {
+        post,
+        platforms,
+        ...(scheduleDate && { scheduleDate }),
+        ...(mediaUrls && { media_urls: mediaUrls })
+      };
+
+      const response = await fetch('https://app.ayrshare.com/api/post', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${process.env.AYRSHARE_API_KEY}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(payload)
+      });
+
+      if (!response.ok) {
+        throw new Error(`Ayrshare API error: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      res.json(data);
+    } catch (error) {
+      console.error('Social post error:', error);
+      res.status(500).json({ error: 'Failed to post to social media' });
+    }
+  });
+
+  // Get connected social accounts
+  app.get('/api/social/accounts', async (req, res) => {
+    if (!process.env.AYRSHARE_API_KEY) {
+      return res.status(500).json({ error: 'Ayrshare API key not configured' });
+    }
+
+    try {
+      const response = await fetch('https://app.ayrshare.com/api/profiles', {
+        headers: {
+          'Authorization': `Bearer ${process.env.AYRSHARE_API_KEY}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error(`Ayrshare API error: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      res.json(data);
+    } catch (error) {
+      console.error('Social accounts error:', error);
+      res.status(500).json({ error: 'Failed to fetch social accounts' });
+    }
+  });
+
 
   // Get scheduled posts
   app.get("/api/posts/scheduled", async (req, res) => {
@@ -154,7 +217,7 @@ export function registerRoutes(app: Express) {
           createdAt: new Date().toISOString(),
         },
         {
-          id: "sched_2", 
+          id: "sched_2",
           post: "Behind the scenes: How we built our content calendar with drag-and-drop functionality. The key was using React DnD with a clean, intuitive interface.",
           platforms: ["linkedin", "twitter"],
           scheduleDate: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString(), // Day after tomorrow
@@ -173,7 +236,7 @@ export function registerRoutes(app: Express) {
         }
       ];
 
-      res.json({ 
+      res.json({
         success: true,
         data: { posts }
       });
@@ -196,7 +259,7 @@ export function registerRoutes(app: Express) {
           createdAt: new Date().toISOString(),
         },
         {
-          id: "2", 
+          id: "2",
           content: "Behind the scenes of our latest project",
           platforms: ["instagram", "facebook"],
           scheduleDate: new Date(Date.now() + 172800000).toISOString(),
@@ -215,10 +278,10 @@ export function registerRoutes(app: Express) {
   app.delete("/api/posts/:id", async (req, res) => {
     try {
       const { id } = req.params;
-      
+
       // Real Ayrshare delete API call
       const deleteResponse = await ayrshareDelete(id);
-      
+
       if (deleteResponse.status === "success") {
         res.json({ success: true, message: "Post deleted successfully" });
       } else {
@@ -264,7 +327,7 @@ export function registerRoutes(app: Express) {
   app.get("/api/analytics/platform/:platform", async (req, res) => {
     try {
       const { platform } = req.params;
-      
+
       // Mock platform-specific analytics
       const platformData = {
         platform,
@@ -296,7 +359,7 @@ export function registerRoutes(app: Express) {
   app.get("/api/calendar/posts", async (req, res) => {
     try {
       const { month, year } = req.query;
-      
+
       // Mock calendar data
       const calendarPosts = [
         {
@@ -309,7 +372,7 @@ export function registerRoutes(app: Express) {
           status: "scheduled"
         },
         {
-          id: "2", 
+          id: "2",
           title: "Weekly Team Update",
           content: "Behind the scenes of our amazing team",
           date: "2025-01-22",
@@ -356,7 +419,7 @@ export function registerRoutes(app: Express) {
         {
           id: "2",
           type: "mention",
-          platform: "Twitter", 
+          platform: "Twitter",
           author: "sarah_marketing",
           authorAvatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=sarah",
           content: "Great insights from @yourcompany on social media trends! Thanks for sharing.",
@@ -370,7 +433,7 @@ export function registerRoutes(app: Express) {
           type: "direct_message",
           platform: "LinkedIn",
           author: "Mike Johnson",
-          authorAvatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=mike", 
+          authorAvatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=mike",
           content: "Hi! I'm interested in learning more about your social media management services. Could we schedule a call?",
           timestamp: new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString(), // 4 hours ago
           isRead: true,
@@ -394,10 +457,10 @@ export function registerRoutes(app: Express) {
 
       const unreadCount = items.filter(item => !item.isRead).length;
 
-      res.json({ 
+      res.json({
         success: true,
-        data: { 
-          items, 
+        data: {
+          items,
           unreadCount,
           totalCount: items.length
         }
@@ -428,7 +491,7 @@ export function registerRoutes(app: Express) {
         {
           id: "2",
           type: "mention",
-          platform: "Twitter", 
+          platform: "Twitter",
           author: "sarah_marketing",
           authorAvatar: "https://via.placeholder.com/32",
           content: "Great insights from @yourcompany on social media trends!",
@@ -441,7 +504,7 @@ export function registerRoutes(app: Express) {
           type: "direct_message",
           platform: "LinkedIn",
           author: "Mike Johnson",
-          authorAvatar: "https://via.placeholder.com/32", 
+          authorAvatar: "https://via.placeholder.com/32",
           content: "Hi! I'm interested in learning more about your services",
           timestamp: "2025-01-14T16:20:00Z",
           isRead: true,
@@ -464,9 +527,9 @@ export function registerRoutes(app: Express) {
         databaseUrl: !!process.env.DATABASE_URL,
         sessionSecret: !!process.env.SESSION_SECRET
       };
-      
-      res.json({ 
-        success: true, 
+
+      res.json({
+        success: true,
         config,
         ready: Object.values(config).every(Boolean)
       });
@@ -489,7 +552,7 @@ export function registerRoutes(app: Express) {
           platforms: ["twitter", "linkedin"]
         },
         {
-          id: "2", 
+          id: "2",
           type: "engagement_received",
           title: "New engagement on Instagram",
           description: "Your post received 25 new likes and 3 comments",
@@ -498,7 +561,7 @@ export function registerRoutes(app: Express) {
         },
         {
           id: "3",
-          type: "post_scheduled", 
+          type: "post_scheduled",
           title: "Post scheduled for tomorrow",
           description: "Your post 'Product Launch Update' is scheduled for Jan 16 at 10:00 AM",
           timestamp: "2025-01-15T07:30:00Z",
@@ -538,7 +601,7 @@ async function ayrsharePost(postData: any) {
     });
 
     const data = await response.json();
-    
+
     if (!response.ok) {
       return {
         status: "error",
@@ -572,7 +635,7 @@ async function ayrshareDelete(postId: string) {
     });
 
     const data = await response.json();
-    
+
     if (!response.ok) {
       return {
         status: "error",
@@ -603,7 +666,7 @@ async function ayrshareHistory() {
     });
 
     const data = await response.json();
-    
+
     if (!response.ok) {
       return {
         status: "error",

@@ -16,11 +16,20 @@ interface Platform {
   enabled: boolean;
 }
 
+// Mock types for media and loading states
+interface MediaItem {
+  file: File;
+  preview: string;
+}
+
 const PostComposer = () => {
   const [content, setContent] = useState('');
   const [selectedPlatforms, setSelectedPlatforms] = useState<string[]>(['linkedin', 'twitter']);
   const [isScheduled, setIsScheduled] = useState(false);
   const [isPosting, setIsPosting] = useState(false);
+  const [isLoading, setIsLoading] = useState(false); // Added for loading state
+  const [scheduledDate, setScheduledDate] = useState(''); // Added for scheduled date
+  const [media, setMedia] = useState<MediaItem[]>([]); // Added for media
 
   const platforms: Platform[] = [
     { id: 'linkedin', name: 'LinkedIn', color: 'bg-blue-600', icon: 'L', enabled: true },
@@ -43,6 +52,51 @@ const PostComposer = () => {
     await new Promise(resolve => setTimeout(resolve, 2000));
     setIsPosting(false);
     setContent('');
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!content.trim()) return;
+
+    setIsLoading(true);
+
+    try {
+      const payload = {
+        post: content,
+        platforms: selectedPlatforms,
+        ...(scheduledDate && { scheduleDate: scheduledDate }),
+        ...(media.length > 0 && { mediaUrls: media.map(m => m.preview) })
+      };
+
+      const response = await fetch('/api/social/post', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(payload)
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to post');
+      }
+
+      const result = await response.json();
+      console.log('Post successful:', result);
+
+      // Reset form
+      setContent('');
+      setSelectedPlatforms(['twitter']);
+      setScheduledDate('');
+      setMedia([]);
+
+      alert(scheduledDate ? 'Post scheduled successfully!' : 'Post published successfully!');
+    } catch (error) {
+      console.error('Post error:', error);
+      alert(`Failed to post: ${error.message}`);
+    }
+
+    setIsLoading(false);
   };
 
   const characterCount = content.length;
@@ -174,8 +228,8 @@ const PostComposer = () => {
               Preview
             </Button>
             <Button 
-              onClick={handlePost}
-              disabled={!content.trim() || selectedPlatforms.length === 0 || isPosting}
+              onClick={handleSubmit} // Changed from handlePost to handleSubmit
+              disabled={!content.trim() || selectedPlatforms.length === 0 || isLoading} // Changed isPosting to isLoading
               className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white shadow-md hover:shadow-lg transition-all mobile-button flex-1 sm:flex-none"
             >
               <Send className="w-4 h-4 mr-1 sm:mr-2" />
