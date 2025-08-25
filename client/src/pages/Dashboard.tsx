@@ -4,6 +4,7 @@ import PostComposer from '@/components/PostComposer';
 import ActivityFeed from '@/components/ActivityFeed';
 import AnalyticsPreview from '@/components/AnalyticsPreview';
 import CalendarPreview from '@/components/CalendarPreview';
+import BulkPostManager from '@/components/BulkPostManager';
 import { Plus, PenTool, Calendar, BarChart, Target, Bell } from 'lucide-react';
 
 export default function Dashboard() {
@@ -134,10 +135,23 @@ export default function Dashboard() {
           </div>
         </div>
 
-        <PostComposer />
-        <ActivityFeed />
-        <AnalyticsPreview />
-        <CalendarPreview />
+        <div className="grid gap-6 md:grid-cols-1 lg:grid-cols-3">
+          <div className="lg:col-span-2">
+            <PostComposer />
+          </div>
+          <div className="space-y-6">
+            <CalendarPreview />
+            <AnalyticsPreview />
+          </div>
+        </div>
+
+        <div className="grid gap-6 md:grid-cols-1">
+          <BulkPostManager />
+        </div>
+
+        <div className="grid gap-6 md:grid-cols-1">
+          <ActivityFeed />
+        </div>
       </div>
     </Layout>
   );

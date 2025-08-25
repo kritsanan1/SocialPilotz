@@ -287,7 +287,10 @@ export default function PostComposer() {
               <Button variant="outline" size="sm">
                 <Target className="w-4 h-4" />
               </Button>
-              <Button disabled={!content.trim() || selectedPlatforms.length === 0 || isPosting}>
+              <Button 
+                onClick={handlePost}
+                disabled={!content.trim() || selectedPlatforms.length === 0 || isPosting}
+              >
                 {isPosting ? (
                   <>
                     <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />

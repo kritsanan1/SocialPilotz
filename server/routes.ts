@@ -9,15 +9,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Social media endpoints
   router.post('/api/social/post', async (req: Request, res: Response) => {
     try {
-      const { post, platforms, mediaUrls, scheduleDate } = req.body;
+      const { post, platforms, mediaUrls, scheduleDate, scheduleDateTime } = req.body;
 
-      // In a real app, you'd get the API key from environment variables or user settings
+      if (!post || !post.trim()) {
+        return res.status(400).json({
+          success: false,
+          error: 'Post content is required'
+        });
+      }
+
+      if (!platforms || platforms.length === 0) {
+        return res.status(400).json({
+          success: false,
+          error: 'At least one platform must be selected'
+        });
+      }
+
       const API_KEY = process.env.AYRSHARE_API_KEY;
 
       if (!API_KEY) {
         return res.status(500).json({
           success: false,
-          error: 'Ayrshare API key not configured'
+          error: 'Ayrshare API key not configured. Please add AYRSHARE_API_KEY to your environment variables.'
         });
       }
 
@@ -32,6 +45,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       if (scheduleDate) {
         payload.scheduleDate = scheduleDate;
+      } else if (scheduleDateTime) {
+        payload.scheduleDate = scheduleDateTime;
       }
 
       const response = await fetch('https://app.ayrshare.com/api/post', {
