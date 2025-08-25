@@ -5,6 +5,7 @@ import ActivityFeed from '@/components/ActivityFeed';
 import AnalyticsPreview from '@/components/AnalyticsPreview';
 import CalendarPreview from '@/components/CalendarPreview';
 import BulkPostManager from '@/components/BulkPostManager';
+import ScheduledPostsList from '@/components/ScheduledPostsList';
 import { Plus, PenTool, Calendar, BarChart, Target, Bell } from 'lucide-react';
 
 export default function Dashboard() {
@@ -149,8 +150,9 @@ export default function Dashboard() {
           <BulkPostManager />
         </div>
 
-        <div className="grid gap-6 md:grid-cols-1">
+        <div className="grid gap-6 md:grid-cols-1 lg:grid-cols-2">
           <ActivityFeed />
+          <ScheduledPostsList />
         </div>
       </div>
     </Layout>

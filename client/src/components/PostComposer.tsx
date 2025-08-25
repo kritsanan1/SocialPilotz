@@ -6,6 +6,7 @@ import { Badge } from './ui/badge';
 import { Input } from './ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { Calendar, Image, Send, Clock, Hash, Sparkles, BarChart3, Target, CheckCircle2, AlertCircle, X } from 'lucide-react';
+import { showSuccessToast, showErrorToast, showWarningToast } from '@/components/ui/toast-messages';
 
 interface SocialPlatform {
   id: string;
@@ -74,6 +75,7 @@ export default function PostComposer() {
       }
     } catch (error) {
       console.error('Error generating hashtags:', error);
+      showErrorToast('Failed to generate hashtags. Please try again.');
     } finally {
       setIsGeneratingHashtags(false);
     }
@@ -102,14 +104,17 @@ export default function PostComposer() {
 
   const handlePost = async () => {
     if (!content.trim()) {
-      setPostStatus('error');
-      setStatusMessage('Please enter some content to post');
+      showWarningToast('Please enter some content to post.');
       return;
     }
 
     if (selectedPlatforms.length === 0) {
-      setPostStatus('error');
-      setStatusMessage('Please select at least one platform');
+      showWarningToast('Please select at least one platform.');
+      return;
+    }
+
+    if (showScheduler && (!scheduleDate || !scheduleTime)) {
+      showWarningToast('Please select both date and time for scheduling.');
       return;
     }
 
@@ -136,17 +141,21 @@ export default function PostComposer() {
       if (result.success) {
         setPostStatus('success');
         setStatusMessage(scheduleDate ? 'Post scheduled successfully!' : 'Post published successfully!');
+        showSuccessToast(scheduleDate ? 'Post scheduled successfully!' : 'Post published successfully!');
         setContent('');
         setScheduleDate('');
         setScheduleTime('');
         setShowScheduler(false);
+        setSuggestedHashtags([]);
       } else {
         setPostStatus('error');
         setStatusMessage(result.error || 'Failed to post content');
+        showErrorToast(result.error || 'Failed to post content');
       }
     } catch (error) {
       setPostStatus('error');
       setStatusMessage('Network error. Please try again.');
+      showErrorToast('Network error. Please try again.');
     } finally {
       setIsPosting(false);
     }
@@ -196,6 +205,11 @@ export default function PostComposer() {
             value={content}
             onChange={(e) => setContent(e.target.value)}
             className="min-h-[120px] resize-none border-0 text-base placeholder:text-gray-400 focus-visible:ring-0"
+            onBlur={() => {
+              if (content.trim() && selectedPlatforms.length === 0) {
+                showWarningToast('Please select at least one platform to post.');
+              }
+            }}
           />
 
           {suggestedHashtags.length > 0 && (
@@ -315,12 +329,22 @@ export default function PostComposer() {
                   value={scheduleDate}
                   onChange={(e) => setScheduleDate(e.target.value)}
                   className="text-sm"
+                  onBlur={() => {
+                    if (scheduleDate && !scheduleTime) {
+                      showWarningToast('Please select a time for your scheduled post.');
+                    }
+                  }}
                 />
                 <Input
                   type="time"
                   value={scheduleTime}
                   onChange={(e) => setScheduleTime(e.target.value)}
                   className="text-sm"
+                  onBlur={() => {
+                    if (scheduleTime && !scheduleDate) {
+                      showWarningToast('Please select a date for your scheduled post.');
+                    }
+                  }}
                 />
               </div>
               <div className="flex gap-2">
