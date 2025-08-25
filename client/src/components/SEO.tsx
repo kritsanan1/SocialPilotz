@@ -1,74 +1,82 @@
 
 import React from 'react';
 
+interface StructuredData {
+  "@context": string;
+  "@type"?: string;
+  "@graph"?: any[];
+  [key: string]: any;
+}
+
 interface SEOProps {
-  title?: string;
-  description?: string;
+  title: string;
+  description: string;
   keywords?: string;
-  canonicalUrl?: string;
-  ogImage?: string;
-  ogType?: string;
-  structuredData?: object;
-  noindex?: boolean;
+  image?: string;
+  url?: string;
+  type?: string;
+  structuredData?: StructuredData;
+  canonical?: string;
 }
 
 const SEO: React.FC<SEOProps> = ({
-  title = "SociaLink - Social Media Management Platform",
-  description = "Powerful social media management platform for scheduling posts, analytics, and multi-platform publishing. Manage all your social accounts in one place.",
-  keywords = "social media management, post scheduling, social analytics, multi-platform posting, content management, social media tools",
-  canonicalUrl,
-  ogImage = "/og-image.jpg",
-  ogType = "website",
+  title,
+  description,
+  keywords,
+  image = '/api/og-image',
+  url = typeof window !== 'undefined' ? window.location.href : '',
+  type = 'website',
   structuredData,
-  noindex = false
+  canonical
 }) => {
   React.useEffect(() => {
-    // Set page title
+    // Set document title
     document.title = title;
-    
-    // Helper function to update or create meta tag
+
+    // Create or update meta tags
     const updateMetaTag = (name: string, content: string, property?: boolean) => {
       const attribute = property ? 'property' : 'name';
-      let meta = document.querySelector(`meta[${attribute}="${name}"]`) as HTMLMetaElement;
+      let meta = document.querySelector(`meta[${attribute}="${name}"]`);
       
       if (!meta) {
         meta = document.createElement('meta');
         meta.setAttribute(attribute, name);
         document.head.appendChild(meta);
       }
+      
       meta.setAttribute('content', content);
     };
 
-    // Set meta tags
+    // Basic meta tags
     updateMetaTag('description', description);
-    updateMetaTag('keywords', keywords);
-    updateMetaTag('robots', noindex ? 'noindex, nofollow' : 'index, follow');
+    if (keywords) updateMetaTag('keywords', keywords);
+    updateMetaTag('robots', 'index, follow');
     
     // Open Graph tags
     updateMetaTag('og:title', title, true);
     updateMetaTag('og:description', description, true);
-    updateMetaTag('og:type', ogType, true);
-    updateMetaTag('og:image', ogImage, true);
-    if (canonicalUrl) updateMetaTag('og:url', canonicalUrl, true);
+    updateMetaTag('og:type', type, true);
+    updateMetaTag('og:url', url, true);
+    updateMetaTag('og:image', image, true);
+    updateMetaTag('og:site_name', 'SociaLink - Social Media Management Platform', true);
     
     // Twitter Card tags
     updateMetaTag('twitter:card', 'summary_large_image');
     updateMetaTag('twitter:title', title);
     updateMetaTag('twitter:description', description);
-    updateMetaTag('twitter:image', ogImage);
-
+    updateMetaTag('twitter:image', image);
+    
     // Canonical URL
-    if (canonicalUrl) {
-      let canonical = document.querySelector('link[rel="canonical"]') as HTMLLinkElement;
-      if (!canonical) {
-        canonical = document.createElement('link');
-        canonical.setAttribute('rel', 'canonical');
-        document.head.appendChild(canonical);
-      }
-      canonical.setAttribute('href', canonicalUrl);
+    const canonicalUrl = canonical || url;
+    let linkCanonical = document.querySelector('link[rel="canonical"]');
+    if (!linkCanonical) {
+      linkCanonical = document.createElement('link');
+      linkCanonical.setAttribute('rel', 'canonical');
+      document.head.appendChild(linkCanonical);
     }
+    linkCanonical.setAttribute('href', canonicalUrl);
 
-    // Structured Data
+    // JSON-LD Structured Data
     if (structuredData) {
       let script = document.querySelector('script[type="application/ld+json"]');
       if (!script) {
@@ -76,10 +84,18 @@ const SEO: React.FC<SEOProps> = ({
         script.setAttribute('type', 'application/ld+json');
         document.head.appendChild(script);
       }
-      script.textContent = JSON.stringify(structuredData);
+      script.textContent = JSON.stringify(structuredData, null, 2);
     }
 
-  }, [title, description, keywords, canonicalUrl, ogImage, ogType, structuredData, noindex]);
+    // Cleanup function
+    return () => {
+      // Remove JSON-LD script when component unmounts
+      const ldScript = document.querySelector('script[type="application/ld+json"]');
+      if (ldScript) {
+        document.head.removeChild(ldScript);
+      }
+    };
+  }, [title, description, keywords, image, url, type, structuredData, canonical]);
 
   return null;
 };

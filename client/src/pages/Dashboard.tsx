@@ -65,19 +65,17 @@ const Dashboard = () => {
         <section aria-labelledby="quick-actions-heading">
           <h2 id="quick-actions-heading" className="sr-only">Quick Actions</h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {quickActions.map((action, index) => (
-            <Card key={index} className="group hover:shadow-lg transition-all duration-300 cursor-pointer border-0 bg-white/80 backdrop-blur-sm">
-              <CardContent className="p-6 text-center">
-                <div className={`w-12 h-12 ${action.color} rounded-xl flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform duration-200`}>
-                  <action.icon className="w-6 h-6 text-white" />
-                </div>
-                <h3 className="font-semibold text-slate-900">{action.label}</h3>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-
-        </div>
+            {quickActions.map((action, index) => (
+              <Card key={index} className="group hover:shadow-lg transition-all duration-300 cursor-pointer border-0 bg-white/80 backdrop-blur-sm">
+                <CardContent className="p-6 text-center">
+                  <div className={`w-12 h-12 ${action.color} rounded-xl flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform duration-200`}>
+                    <action.icon className="w-6 h-6 text-white" />
+                  </div>
+                  <h3 className="font-semibold text-slate-900">{action.label}</h3>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
         </section>
 
         {/* Stats Overview */}
@@ -90,23 +88,21 @@ const Dashboard = () => {
         <section aria-labelledby="insights-heading">
           <h2 id="insights-heading" className="sr-only">Performance Insights</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {insights.map((insight, index) => (
-            <Card key={index} className="bg-white/90 backdrop-blur-sm border-0 shadow-sm hover:shadow-md transition-all duration-300">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <insight.icon className="w-8 h-8 text-slate-600" />
-                  <Badge variant="outline" className="text-green-600 bg-green-50 border-green-200">
-                    {insight.trend}
-                  </Badge>
-                </div>
-                <h3 className="text-2xl font-bold text-slate-900 mb-1">{insight.value}</h3>
-                <p className="text-sm text-slate-600">{insight.title}</p>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-
-        </div>
+            {insights.map((insight, index) => (
+              <Card key={index} className="bg-white/90 backdrop-blur-sm border-0 shadow-sm hover:shadow-md transition-all duration-300">
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <insight.icon className="w-8 h-8 text-slate-600" />
+                    <Badge variant="outline" className="text-green-600 bg-green-50 border-green-200">
+                      {insight.trend}
+                    </Badge>
+                  </div>
+                  <h3 className="text-2xl font-bold text-slate-900 mb-1">{insight.value}</h3>
+                  <p className="text-sm text-slate-600">{insight.title}</p>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
         </section>
 
         {/* Main Content Grid */}

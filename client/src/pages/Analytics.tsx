@@ -3,7 +3,7 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, LineChart, Line, P
 import { TrendingUp, Users, MessageSquare, Share2, Calendar, BarChart3 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
-import SEO from "../components/SEO";
+import SEO from '../components/SEO';
 import { breadcrumbSchema } from "../utils/structuredData";
 
 export default function Analytics() {
@@ -33,13 +33,43 @@ export default function Analytics() {
     return (
       <>
         <SEO 
-          title="Social Media Analytics - SociaLink Dashboard"
-          description="Comprehensive social media analytics and insights. Track engagement, reach, and performance across all your social media platforms."
-          keywords="social media analytics, engagement tracking, social media metrics, performance analysis"
-          structuredData={breadcrumbSchema([
-            { name: "Dashboard", url: "/" },
-            { name: "Analytics", url: "/analytics" }
-          ])}
+          title="Social Media Analytics - Track Performance | SociaLink"
+          description="Comprehensive social media analytics dashboard. Track engagement, reach, followers, and performance across all your social media platforms."
+          keywords="social media analytics, social media metrics, engagement tracking, social media insights, performance analytics"
+          structuredData={{
+            "@context": "https://schema.org",
+            "@graph": [
+              {
+                "@context": "https://schema.org",
+                "@type": "Organization",
+                "url": "https://example.com",
+                "name": "SociaLink",
+                "logo": "https://example.com/logo.png",
+                "sameAs": [
+                  "https://twitter.com/example",
+                  "https://www.linkedin.com/company/example"
+                ]
+              },
+              {
+                "@context": "https://schema.org",
+                "@type": "BreadcrumbList",
+                "itemListElement": [
+                  {
+                    "@type": "ListItem",
+                    "position": 1,
+                    "name": "Dashboard",
+                    "item": "https://example.com/"
+                  },
+                  {
+                    "@type": "ListItem",
+                    "position": 2,
+                    "name": "Analytics",
+                    "item": "https://example.com/analytics"
+                  }
+                ]
+              }
+            ]
+          }}
         />
         <main className="container mx-auto p-6 space-y-8" role="main">
           <div className="animate-pulse space-y-4">
@@ -60,13 +90,43 @@ export default function Analytics() {
   return (
     <>
       <SEO 
-        title="Social Media Analytics - SociaLink Dashboard"
-        description="Comprehensive social media analytics and insights. Track engagement, reach, and performance across all your social media platforms."
-        keywords="social media analytics, engagement tracking, social media metrics, performance analysis"
-        structuredData={breadcrumbSchema([
-          { name: "Dashboard", url: "/" },
-          { name: "Analytics", url: "/analytics" }
-        ])}
+        title="Social Media Analytics - Track Performance | SociaLink"
+        description="Comprehensive social media analytics dashboard. Track engagement, reach, followers, and performance across all your social media platforms."
+        keywords="social media analytics, social media metrics, engagement tracking, social media insights, performance analytics"
+        structuredData={{
+          "@context": "https://schema.org",
+          "@graph": [
+            {
+              "@context": "https://schema.org",
+              "@type": "Organization",
+              "url": "https://example.com",
+              "name": "SociaLink",
+              "logo": "https://example.com/logo.png",
+              "sameAs": [
+                "https://twitter.com/example",
+                "https://www.linkedin.com/company/example"
+              ]
+            },
+            {
+              "@context": "https://schema.org",
+              "@type": "BreadcrumbList",
+              "itemListElement": [
+                {
+                  "@type": "ListItem",
+                  "position": 1,
+                  "name": "Dashboard",
+                  "item": "https://example.com/"
+                },
+                {
+                  "@type": "ListItem",
+                  "position": 2,
+                  "name": "Analytics",
+                  "item": "https://example.com/analytics"
+                }
+              ]
+            }
+          ]
+        }}
       />
       <main className="container mx-auto p-6 space-y-8" role="main">
         <div className="flex items-center justify-between">
